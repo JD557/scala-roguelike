@@ -13,7 +13,7 @@ object Main extends MinartApp {
     width = Constants.screenWidth * Constants.spriteWidth,
     height = Constants.screenHeight * Constants.spriteHeight,
     scale = 2,
-    clearColor = Color(0, 0, 0)
+    clearColor = Constants.Pallete.black
   )
   val canvasManager = CanvasManager()
   val initialState  = AppState.initialState

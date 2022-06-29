@@ -11,12 +11,13 @@ object Constants {
 
   object Pallete {
     val white   = Color(255, 255, 255)
+    val gray    = Color(127, 127, 127)
+    val black   = Color(0, 0, 0)
     val red     = Color(255, 0, 0)
     val green   = Color(0, 255, 0)
     val blue    = Color(0, 0, 255)
     val yellow  = Color(255, 255, 0)
     val cyan    = Color(0, 255, 255)
     val magenta = Color(255, 0, 255)
-    val black   = Color(0, 0, 0)
   }
 }
