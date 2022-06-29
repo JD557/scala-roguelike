@@ -1,5 +1,7 @@
 package eu.joaocosta.roguelike
 
+import scala.util.Random
+
 import eu.joaocosta.roguelike.AppState._
 
 sealed trait AppState {
@@ -34,17 +36,14 @@ case object Leaving extends AppState {
 }
 
 object AppState {
-  val initialState: AppState =
+  val initialState: AppState = {
+    val (initialMap, initialPlayer) = MapGenerator
+      .generateMap(width = 80, height = 45, roomMaxSize = 10, roomMinSize = 6, maxRooms = 30, random = new Random(0))
     InGame(
-      gameMap = GameMap(
-        Map(
-          (30, 22) -> GameMap.Tile.Wall,
-          (31, 22) -> GameMap.Tile.Wall,
-          (32, 22) -> GameMap.Tile.Wall
-        )
-      ),
-      player = Entity.Player(x = Constants.screenWidth / 2, y = Constants.screenHeight / 2),
+      gameMap = initialMap,
+      player = initialPlayer,
       npcs = List(Entity.Npc(x = Constants.screenWidth / 2 - 5, y = Constants.screenHeight / 2))
     )
+  }
 
 }
