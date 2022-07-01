@@ -3,7 +3,7 @@ package eu.joaocosta.roguelike
 import scala.annotation.tailrec
 
 case class GameMap(tiles: Map[(Int, Int), GameMap.Tile]) {
-  def isWalkable(x: Int, y: Int) = tiles.get((x, y)).forall(_.walkable)
+  def isTransparent(x: Int, y: Int) = tiles.get((x, y)).forall(_.walkable)
 
   def visibleFrom(x: Int, y: Int, range: Int): Set[(Int, Int)] = {
     @tailrec
@@ -15,7 +15,7 @@ case class GameMap(tiles: Map[(Int, Int), GameMap.Tile]) {
           dx       <- -1 to 1
           dy       <- -1 to 1
         } yield (sx + dx, sy + dy)).toSet
-        val nextSeeds = candidates.filter(isWalkable)
+        val nextSeeds = candidates.filter(isTransparent)
         floodFill(nextSeeds, remaining - 1, acc ++ candidates)
       }
     floodFill(Set((x, y)), range, Set((x, y)))

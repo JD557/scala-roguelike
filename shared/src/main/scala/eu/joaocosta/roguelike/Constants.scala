@@ -5,11 +5,12 @@ import eu.joaocosta.minart.graphics._
 object Constants {
   val screenWidth  = 80
   val screenHeight = 50
+  val maxMessages  = 3
 
   val spriteWidth  = 8
   val spriteHeight = 8
 
-  val playerVision = 5
+  val playerVision = 8
 
   object Pallete { // From http://androidarts.com/palette/16pal.htm
     val black      = Color(0, 0, 0)
