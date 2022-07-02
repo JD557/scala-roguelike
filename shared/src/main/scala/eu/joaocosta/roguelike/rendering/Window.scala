@@ -1,8 +1,9 @@
-package eu.joaocosta.roguelike
+package eu.joaocosta.roguelike.rendering
 
 import eu.joaocosta.minart.graphics._
 import eu.joaocosta.minart.graphics.image._
 import eu.joaocosta.minart.graphics.pure._
+import eu.joaocosta.roguelike.Constants
 
 case class Window(tiles: Map[(Int, Int), Window.Sprite]) {
 

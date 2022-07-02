@@ -5,13 +5,12 @@ import eu.joaocosta.minart.graphics._
 object Constants {
   val screenWidth  = 80
   val screenHeight = 50
-  val maxMessages  = 3
 
   val spriteWidth  = 8
   val spriteHeight = 8
 
   val playerVision = 8
-  val levelGenerator = LevelGenerator.DefaultLevelGenerator(
+  val levelGenerator = generator.DefaultLevelGenerator(
     width = 80,
     height = 45,
     roomMaxSize = 10,
@@ -19,6 +18,7 @@ object Constants {
     maxRooms = 30,
     maxMonsters = 2
   )
+  val maxMessages = screenHeight - levelGenerator.height
 
   object Pallete { // From http://androidarts.com/palette/16pal.htm
     val black      = Color(0, 0, 0)

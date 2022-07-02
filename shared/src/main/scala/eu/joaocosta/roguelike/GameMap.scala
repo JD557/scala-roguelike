@@ -2,6 +2,8 @@ package eu.joaocosta.roguelike
 
 import scala.annotation.tailrec
 
+import eu.joaocosta.roguelike.rendering.Window
+
 case class GameMap(tiles: Map[(Int, Int), GameMap.Tile]) {
   def isTransparent(x: Int, y: Int) = tiles.get((x, y)).forall(_.walkable)
 

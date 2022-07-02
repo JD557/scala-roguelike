@@ -1,6 +1,7 @@
 package eu.joaocosta.roguelike
 
 import eu.joaocosta.minart.graphics._
+import eu.joaocosta.roguelike.rendering.Window
 
 sealed trait Entity {
   def x: Int

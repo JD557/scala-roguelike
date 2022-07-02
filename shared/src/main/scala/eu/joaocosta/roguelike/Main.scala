@@ -5,6 +5,8 @@ import eu.joaocosta.minart.graphics._
 import eu.joaocosta.minart.graphics.pure._
 import eu.joaocosta.minart.runtime._
 import eu.joaocosta.minart.runtime.pure._
+import eu.joaocosta.roguelike.AppState._
+import eu.joaocosta.roguelike.rendering.AppStateRenderer
 
 object Main extends MinartApp {
   type State = AppState
@@ -27,7 +29,7 @@ object Main extends MinartApp {
           _     <- CanvasIO.redraw
           input <- CanvasIO.getKeyboardInput
           _     <- CanvasIO.clear()
-          _     <- state.toWindow.render(Resources.richFont)
+          _     <- AppStateRenderer.render(state, Resources.richFont)
           actions   = Action.getActions(input)
           nextState = actions.foldLeft(appState)((st, a) => st.applyAction(a))
         } yield nextState
