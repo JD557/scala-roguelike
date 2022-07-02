@@ -11,6 +11,14 @@ object Constants {
   val spriteHeight = 8
 
   val playerVision = 8
+  val levelGenerator = LevelGenerator.DefaultLevelGenerator(
+    width = 80,
+    height = 45,
+    roomMaxSize = 10,
+    roomMinSize = 6,
+    maxRooms = 30,
+    maxMonsters = 2
+  )
 
   object Pallete { // From http://androidarts.com/palette/16pal.htm
     val black      = Color(0, 0, 0)

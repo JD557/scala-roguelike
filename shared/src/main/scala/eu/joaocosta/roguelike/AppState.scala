@@ -74,16 +74,7 @@ case object Leaving extends AppState {
 
 object AppState {
   val initialState: AppState = {
-    val initialLevel = LevelGenerator
-      .generateLevel(
-        width = 80,
-        height = 45,
-        roomMaxSize = 10,
-        roomMinSize = 6,
-        maxRooms = 30,
-        maxMonsters = 2,
-        random = new Random(0)
-      )
+    val initialLevel = Constants.levelGenerator.generateLevel(new Random(0))
     InGame(
       currentLevel = initialLevel,
       player = initialLevel.playerStart,
