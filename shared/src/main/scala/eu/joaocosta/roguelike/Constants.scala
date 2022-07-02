@@ -18,7 +18,7 @@ object Constants {
     maxRooms = 30,
     maxMonsters = 2
   )
-  val maxMessages = screenHeight - levelGenerator.height
+  val maxMessages = screenHeight - levelGenerator.height - 1
 
   object Pallete { // From http://androidarts.com/palette/16pal.htm
     val black      = Color(0, 0, 0)

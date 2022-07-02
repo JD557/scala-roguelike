@@ -27,13 +27,15 @@ object AppStateRenderer {
         }
         .toList
       val baseWindow = Window.empty.addTiles(tileMap).addTiles(entitySprites)
-      inGame.messages.zipWithIndex.foldLeft(baseWindow) { case (window, (textMessage, y)) =>
-        val color =
-          if (y == 0) Constants.Pallete.white
-          else if (y == 1) Constants.Pallete.gray
-          else Constants.Pallete.darkGray
-        window.printLine(0, Constants.screenHeight - 1 - y, textMessage, color)
-      }
+      inGame.messages.zipWithIndex
+        .foldLeft(baseWindow) { case (window, (textMessage, y)) =>
+          val color =
+            if (y == 0) Constants.Pallete.white
+            else if (y == 1) Constants.Pallete.gray
+            else Constants.Pallete.darkGray
+          window.printLine(0, Constants.screenHeight - 2 - y, textMessage, color)
+        }
+        .printLine(0, Constants.screenHeight - 1, inGame.player.fighter.map(_.statusString).getOrElse(""))
     case _ => Window.empty
   }
 }
