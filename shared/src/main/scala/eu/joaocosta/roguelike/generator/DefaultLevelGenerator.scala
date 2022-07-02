@@ -58,7 +58,7 @@ case class DefaultLevelGenerator(
     val (rooms, tunnels) = genRooms()
     val map =
       ((0 until width).flatMap(x => (0 until height).map(y => (x, y) -> GameMap.Tile.Wall)).iterator ++
-        (rooms.iterator ++ tunnels.iterator).flatMap(_.tiles()).map(pos => pos -> GameMap.Tile.Floor)).toMap
+        (rooms.iterator ++ tunnels.iterator).flatMap(_.tiles).map(pos => pos -> GameMap.Tile.Floor)).toMap
     Level(
       playerStart = Entity.Player(rooms.head.center._1, rooms.head.center._2),
       gameMap = GameMap(map),

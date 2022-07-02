@@ -11,7 +11,7 @@ trait LevelGenerator {
 
 object LevelGenerator {
   def randomEntityPositions(room: Room, maxEntities: Int, random: Random): List[(Int, Int)] =
-    random.shuffle(room.tiles()).take(random.nextInt(maxEntities + 1)).toList
+    random.shuffle(room.tiles.iterator).take(random.nextInt(maxEntities + 1)).toList
 
   def randomRectangularRoom(
       levelWidth: Int,
