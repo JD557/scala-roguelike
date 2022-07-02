@@ -35,17 +35,14 @@ case class InGame(
           .fold(entity.sprite)(tile => entity.sprite.copy(bg = tile.bg))
         (entity.x, entity.y) -> sprite
       }
-      .toMap
-    val messagesMap = (for {
-      (textMessage, y) <- messages.zipWithIndex
-      (char, x)        <- textMessage.zipWithIndex
-      color =
+    val baseWindow = Window.empty.addTiles(tileMap).addTiles(entitiesMap)
+    messages.zipWithIndex.foldLeft(baseWindow) { case (window, (textMessage, y)) =>
+      val color =
         if (y == 0) Constants.Pallete.white
         else if (y == 1) Constants.Pallete.gray
         else Constants.Pallete.darkGray
-      sprite = Window.Sprite(char, color)
-    } yield (x, Constants.screenHeight - 1 - y) -> sprite).toMap
-    Window(tileMap ++ entitiesMap ++ messagesMap)
+      window.printLine(0, Constants.screenHeight - 1 - y, textMessage, color)
+    }
   }
 
   def printLine(message: String) = copy(messages = (message :: messages).take(Constants.maxMessages))
