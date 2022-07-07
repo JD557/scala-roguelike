@@ -18,7 +18,7 @@ object AppState {
       currentLevel = initialLevel,
       player = initialLevel.playerStart,
       exploredTiles = Set(),
-      messages = List("Welcome to the Dungeon!")
+      messages = List(Constants.Message.Welcome)
     )
   }
 
@@ -26,7 +26,7 @@ object AppState {
       currentLevel: Level,
       player: Entity.Player,
       exploredTiles: Set[(Int, Int)],
-      messages: List[String]
+      messages: List[Constants.Message]
   ) extends AppState {
 
     val visibleTiles: Set[(Int, Int)] =
@@ -35,7 +35,7 @@ object AppState {
     val entities: List[Entity] =
       List(player) ++ currentLevel.npcs
 
-    def printLine(message: String) = copy(messages = (message :: messages).take(Constants.maxMessages))
+    def printLine(message: Constants.Message) = copy(messages = (message :: messages).take(Constants.maxMessages))
 
     def applyAction(action: Action): AppState = action match {
       case Action.QuitGame => Leaving
@@ -56,8 +56,8 @@ object AppState {
         val damage = player.fighter.fold(0)(_.computeDamage(npc.fighter))
         val newNpc = npc.applyDamage(damage)
         val message =
-          if (newNpc.fighter.exists(_.isDead)) s"You killed the ${npc.name}"
-          else s"You kicked the ${npc.name} for $damage damage"
+          if (newNpc.fighter.exists(_.isDead)) Constants.Message.KilledNpc(npc.name)
+          else Constants.Message.DamagedNpc(npc.name, damage)
         printLine(message).copy(currentLevel =
           currentLevel.updateNpc(npc, Option.when(!newNpc.fighter.exists(_.isDead))(newNpc))
         )
@@ -74,15 +74,15 @@ object AppState {
         val damage    = npc.fighter.fold(0)(_.computeDamage(player.fighter))
         val newPlayer = player.applyDamage(damage)
         val message =
-          if (newPlayer.fighter.exists(_.isDead)) s"You have been killed by ${npc.name}"
-          else s"${npc.name} kicked you for $damage damage"
+          if (newPlayer.fighter.exists(_.isDead)) Constants.Message.KilledBy(npc.name)
+          else Constants.Message.DamagedBy(npc.name, damage)
         printLine(message).copy(player = newPlayer)
       case Action.NpcTurn =>
         currentLevel.npcs.foldLeft(this: AppState) { case (st, npc) =>
           npc.ai.fold(st)(ai => st.applyAction(ai.nextAction(npc, player, currentLevel)))
         }
       case Action.Stare(source, destination) =>
-        printLine(s"${source.name} is looking at ${destination.name}")
+        printLine(Constants.Message.Stare(source.name, destination.name))
     }
   }
 

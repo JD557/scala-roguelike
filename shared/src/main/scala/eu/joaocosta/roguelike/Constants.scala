@@ -19,6 +19,7 @@ object Constants {
     maxMonsters = 2
   )
   val maxMessages = screenHeight - levelGenerator.height - 1
+  val hpBarSize   = 20
 
   object Pallete { // From http://androidarts.com/palette/16pal.htm
     val black      = Color(0, 0, 0)
@@ -37,5 +38,17 @@ object Constants {
     val darkBlue   = Color(0, 87, 132)
     val blue       = Color(49, 162, 242)
     val lightBlue  = Color(178, 220, 239)
+  }
+
+  enum Message(val text: String, val color: Color) {
+    case Welcome                    extends Message("Welcome to the Dungeon!", Constants.Pallete.blue)
+    case KilledNpc(npcName: String) extends Message(s"You killed the ${npcName}", Constants.Pallete.orange)
+    case DamagedNpc(npcName: String, damage: Int)
+        extends Message(s"You kicked the ${npcName} for ${damage} damage", Constants.Pallete.white)
+    case KilledBy(npcName: String) extends Message(s"You have been killed by ${npcName}", Constants.Pallete.red)
+    case DamagedBy(npcName: String, damage: Int)
+        extends Message(s"${npcName} kicked you for ${damage} damage", Constants.Pallete.lightRed)
+    case Stare(source: String, destination: String)
+        extends Message(s"${source} is looking at ${destination}", Constants.Pallete.gray)
   }
 }
