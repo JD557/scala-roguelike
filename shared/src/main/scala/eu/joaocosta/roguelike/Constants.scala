@@ -61,6 +61,10 @@ object Constants {
         )
     case Stare(source: Entity, target: Entity)
         extends Message(s"${source.name} is looking at ${target.name}", Constants.Pallete.gray)
+    case InventoryFull(source: Entity)
+        extends Message(s"${source.name} can't carry anything else", Constants.Pallete.orange)
+    case PickedUp(source: Entity, target: Entity)
+        extends Message(s"${source.name} picked up ${target.name}", Constants.Pallete.white)
     case UsedItem(source: Entity, target: Entity, item: Entity)
         extends Message(
           if (source == target) s"${source.name} used a ${item.name}"

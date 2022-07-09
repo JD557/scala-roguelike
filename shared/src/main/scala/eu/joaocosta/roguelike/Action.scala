@@ -10,6 +10,7 @@ enum Action {
   case NothingHappened
   case Stare(source: Entity, destination: Entity)
   case PlayerMovement(dx: Int, dy: Int)
+  case PickUp
   case Movement(target: MoveableEntity, dx: Int, dy: Int)
   case Attack(source: FighterEntity, target: FighterEntity)
   case Heal(target: FighterEntity, amount: Int)
@@ -27,6 +28,7 @@ object Action {
       case KeyboardInput.Key.Right  => List(PlayerMovement(1, 0))
       case KeyboardInput.Key.Space  => List(NpcTurn)
       case KeyboardInput.Key.V      => List(SwitchHistoryViewer)
+      case KeyboardInput.Key.G      => List(PickUp)
       case _                        => Nil
     }
   }

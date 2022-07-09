@@ -78,6 +78,18 @@ object AppState {
           applyAction(Action.Attack(target.asInstanceOf[FighterEntity], player))
         else
           this
+      case Action.PickUp =>
+        currentLevel.items.find(item => item.x == player.x && item.y == player.y) match {
+          case Some(item) =>
+            if (player.inventory.isFull) printLine(Constants.Message.InventoryFull(player))
+            else
+              printLine(Constants.Message.PickedUp(player, item))
+                .updateEntity(player, player.addItem(item))
+                .copy(currentLevel = currentLevel.updateEntity(item, None))
+                .applyAction(Action.NpcTurn)
+          case None =>
+            applyAction(Action.NothingHappened)
+        }
       case Action.Attack(source, target) =>
         val damage    = source.fighter.computeDamage(target.fighter)
         val newTarget = target.applyDamage(damage)

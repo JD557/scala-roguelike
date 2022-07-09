@@ -10,7 +10,8 @@ case class Level(
     entities: List[Entity]
 ) {
 
-  lazy val npcs: List[Entity.Npc] = entities.collect { case npc: Entity.Npc => npc }
+  lazy val npcs: List[Entity.Npc]   = entities.collect { case npc: Entity.Npc => npc }
+  lazy val items: List[Entity.Item] = entities.collect { case item: Entity.Item => item }
 
   def isWalkable(x: Int, y: Int) =
     gameMap.tiles.get((x, y)).forall(_.walkable) && !entities.exists(e => !e.isWalkable && x == e.x && y == e.y)
