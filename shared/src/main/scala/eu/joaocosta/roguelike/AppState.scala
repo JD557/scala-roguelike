@@ -33,7 +33,7 @@ object AppState {
       currentLevel.gameMap.visibleFrom(player.x, player.y, Constants.playerVision)
 
     val entities: List[Entity] =
-      List(player) ++ currentLevel.npcs
+      List(player) ++ currentLevel.entities
 
     def printLine(message: Constants.Message): InGame =
       copy(messages = (message :: messages).take(Constants.maxMessages))
@@ -54,13 +54,13 @@ object AppState {
             }
         nextState.applyAction(Action.NpcTurn)
       case Action.PlayerAttack(npc) =>
-        val damage = player.fighter.fold(0)(_.computeDamage(npc.fighter))
+        val damage = player.fighter.computeDamage(npc.fighter)
         val newNpc = npc.applyDamage(damage)
         val message =
-          if (newNpc.fighter.exists(_.isDead)) Constants.Message.KilledNpc(npc.name)
+          if (newNpc.fighter.isDead) Constants.Message.KilledNpc(npc.name)
           else Constants.Message.DamagedNpc(npc.name, damage)
         printLine(message).copy(currentLevel =
-          currentLevel.updateNpc(npc, Option.when(!newNpc.fighter.exists(_.isDead))(newNpc))
+          currentLevel.updateEntity(npc, Some(if (!newNpc.fighter.isDead) newNpc else Entity.Corpse(newNpc)))
         )
       case Action.NpcMovement(npc, dx, dy) =>
         val nextX = npc.x + dx
@@ -68,19 +68,19 @@ object AppState {
         if (nextX == player.x && nextY == player.y)
           applyAction(Action.NpcAttack(npc))
         else if (currentLevel.isWalkable(nextX, nextY))
-          copy(currentLevel = currentLevel.updateNpc(npc, Some(npc.move(dx, dy))))
+          copy(currentLevel = currentLevel.updateEntity(npc, Some(npc.move(dx, dy))))
         else
           this
       case Action.NpcAttack(npc) =>
-        val damage    = npc.fighter.fold(0)(_.computeDamage(player.fighter))
+        val damage    = npc.fighter.computeDamage(player.fighter)
         val newPlayer = player.applyDamage(damage)
-        if (newPlayer.fighter.exists(_.isDead))
+        if (newPlayer.fighter.isDead)
           GameOver(finalState = printLine(Constants.Message.KilledBy(npc.name)).copy(player = newPlayer))
         else
           printLine(Constants.Message.DamagedBy(npc.name, damage)).copy(player = newPlayer)
       case Action.NpcTurn =>
         currentLevel.npcs.foldLeft(this: AppState) { case (st, npc) =>
-          npc.ai.fold(st)(ai => st.applyAction(ai.nextAction(npc, player, currentLevel)))
+          st.applyAction(npc.ai.nextAction(npc, player, currentLevel))
         }
       case Action.Stare(source, destination) =>
         printLine(Constants.Message.Stare(source.name, destination.name))

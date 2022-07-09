@@ -7,15 +7,18 @@ import eu.joaocosta.roguelike.entity.Entity
 case class Level(
     playerStart: Entity.Player,
     gameMap: GameMap,
-    npcs: List[Entity.Npc]
+    entities: List[Entity]
 ) {
-  def isWalkable(x: Int, y: Int) =
-    gameMap.tiles.get((x, y)).forall(_.walkable) && !npcs.exists(npc => x == npc.x && y == npc.y)
 
-  def updateNpc(from: Entity.Npc, to: Option[Entity.Npc]) = {
-    val withoutNpc = npcs.filterNot(_ == from)
-    if (withoutNpc.size == npcs.size) this
-    else copy(npcs = to.fold(withoutNpc)(npc => npc :: withoutNpc))
+  lazy val npcs: List[Entity.Npc] = entities.collect { case npc: Entity.Npc => npc }
+
+  def isWalkable(x: Int, y: Int) =
+    gameMap.tiles.get((x, y)).forall(_.walkable) && !entities.exists(e => !e.isWalkable && x == e.x && y == e.y)
+
+  def updateEntity(from: Entity, to: Option[Entity]) = {
+    val withoutEntity = entities.filterNot(_ == from)
+    if (withoutEntity.size == entities.size) this
+    else copy(entities = to.fold(withoutEntity)(entity => entity :: withoutEntity))
   }
 
   def pathfind(x1: Int, y1: Int, x2: Int, y2: Int): List[(Int, Int)] = {

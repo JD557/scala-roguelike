@@ -26,10 +26,11 @@ object AppStateRenderer extends ChainingSyntax {
     val entitySprites = state.entities.iterator
       .filter(e => state.visibleTiles(e.x, e.y))
       .flatMap(e => tileMap.get(e.x, e.y).map(t => e -> t))
+      .toList
+      .sortBy(!_._1.isWalkable)
       .map { case (entity, tile) =>
         (entity.x, entity.y) -> entity.sprite.copy(bg = tile.bg)
       }
-      .toList
     window.addTiles(tileMap).addTiles(entitySprites)
   }
 
@@ -41,10 +42,11 @@ object AppStateRenderer extends ChainingSyntax {
   }
 
   private def putPlayerStatus(state: InGame)(window: Window): Window = {
-    val fighter     = state.player.fighter.getOrElse(Fighter(1, 1, 0, 0))
-    val filledTiles = (Constants.hpBarSize * fighter.hp) / fighter.maxHp
+    val filledTiles = (Constants.hpBarSize * state.player.fighter.hp) / state.player.fighter.maxHp
     val freeTiles   = Constants.hpBarSize - filledTiles
-    val barText     = s" HP: ${fighter.hp}/${fighter.maxHp}".padTo(Constants.hpBarSize, ' ').take(Constants.hpBarSize)
+    val barText = s" HP: ${state.player.fighter.hp}/${state.player.fighter.maxHp}"
+      .padTo(Constants.hpBarSize, ' ')
+      .take(Constants.hpBarSize)
     window
       .printLine(
         0,
@@ -63,12 +65,12 @@ object AppStateRenderer extends ChainingSyntax {
       .printLine(
         1,
         Constants.screenHeight - Constants.maxMessages + 1,
-        s"ATK: ${fighter.attack}"
+        s"ATK: ${state.player.fighter.attack}"
       )
       .printLine(
         1,
         Constants.screenHeight - Constants.maxMessages + 2,
-        s"DEF: ${fighter.defense}"
+        s"DEF: ${state.player.fighter.defense}"
       )
   }
 

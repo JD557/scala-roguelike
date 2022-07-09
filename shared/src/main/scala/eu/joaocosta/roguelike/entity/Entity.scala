@@ -10,43 +10,49 @@ sealed trait Entity {
 
   def name: String
   def sprite: Window.Sprite
-  def fighter: Option[Fighter]
-  def ai: Option[Behavior]
-
-  def move(dx: Int, dy: Int): Entity
-  def applyDamage(damage: Int): Entity
+  def isWalkable: Boolean
 }
 
 object Entity {
-  case class Player(x: Int, y: Int, fighter: Option[Fighter] = Some(Fighter(30, 30, 5, 2))) extends Entity {
+  case class Player(x: Int, y: Int, fighter: Fighter = Fighter(30, 30, 5, 2))
+      extends Entity
+      with Moveable.Component[Player]
+      with Fighter.Component[Player] {
     val name = "Player"
-    def sprite =
-      if (fighter.map(_.hp).contains(0)) Window.Sprite('%', Constants.Pallete.white)
+    val sprite =
+      if (fighter.isDead) Window.Sprite('%', Constants.Pallete.white)
       else Window.Sprite('@', Constants.Pallete.white)
-    val ai = None
+    val isWalkable = false
 
-    def move(dx: Int, dy: Int): Player   = copy(x = x + dx, y = y + dy)
-    def applyDamage(damage: Int): Player = copy(fighter = fighter.map(_.applyDamage(damage)))
+    def move(dx: Int, dy: Int): Player               = copy(x = x + dx, y = y + dy)
+    def updateFighter(f: Fighter => Fighter): Player = copy(fighter = f(fighter))
   }
 
-  sealed trait Npc extends Entity {
-    def move(dx: Int, dy: Int): Entity.Npc
-    def applyDamage(damage: Int): Entity.Npc
+  sealed trait Npc extends Entity with Moveable.Component[Npc] with Fighter.Component[Npc] with Behavior.Component {
+    val isWalkable = false
   }
-  case class Orc(x: Int, y: Int, fighter: Option[Fighter] = Some(Fighter(10, 10, 3, 0))) extends Npc {
-    def name   = "Orc"
+  case class Orc(x: Int, y: Int, fighter: Fighter = Fighter(10, 10, 3, 0)) extends Npc {
+    val name   = "Orc"
     val sprite = Window.Sprite('o', Constants.Pallete.darkGreen)
-    val ai     = Some(Behavior.JustStare)
 
-    def move(dx: Int, dy: Int): Orc   = copy(x = x + dx, y = y + dy)
-    def applyDamage(damage: Int): Orc = copy(fighter = fighter.map(_.applyDamage(damage)))
+    def move(dx: Int, dy: Int): Orc               = copy(x = x + dx, y = y + dy)
+    def updateFighter(f: Fighter => Fighter): Orc = copy(fighter = f(fighter))
+    val ai                                        = Behavior.JustStare
   }
-  case class Troll(x: Int, y: Int, fighter: Option[Fighter] = Some(Fighter(16, 16, 4, 1))) extends Npc {
-    def name   = "Troll"
+  case class Troll(x: Int, y: Int, fighter: Fighter = Fighter(16, 16, 4, 1)) extends Npc {
+    val name   = "Troll"
     val sprite = Window.Sprite('T', Constants.Pallete.green)
-    val ai     = Some(Behavior.Hostile)
+    val ai     = Behavior.Hostile
 
-    def move(dx: Int, dy: Int): Troll   = copy(x = x + dx, y = y + dy)
-    def applyDamage(damage: Int): Troll = copy(fighter = fighter.map(_.applyDamage(damage)))
+    def move(dx: Int, dy: Int): Troll               = copy(x = x + dx, y = y + dy)
+    def updateFighter(f: Fighter => Fighter): Troll = copy(fighter = f(fighter))
+  }
+  case class Corpse(of: Entity) extends Entity {
+    val name       = s"${of.name} corpse"
+    val sprite     = Window.Sprite('%', Constants.Pallete.darkGray)
+    val isWalkable = true
+
+    val x = of.x
+    val y = of.y
   }
 }

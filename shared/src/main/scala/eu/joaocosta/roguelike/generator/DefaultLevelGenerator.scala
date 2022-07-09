@@ -63,7 +63,7 @@ case class DefaultLevelGenerator(
     Level(
       playerStart = Entity.Player(rooms.head.center._1, rooms.head.center._2),
       gameMap = GameMap(map),
-      npcs = rooms.tail.flatMap(room => generateEnemies(room, random))
+      entities = rooms.tail.flatMap(room => generateEnemies(room, random))
     )
   }
 }

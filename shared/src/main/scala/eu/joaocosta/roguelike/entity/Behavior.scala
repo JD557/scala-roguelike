@@ -7,6 +7,10 @@ sealed trait Behavior {
 }
 
 object Behavior {
+  trait Component {
+    def ai: Behavior
+  }
+
   case object DoNothing extends Behavior {
     def nextAction(entity: Entity.Npc, player: Entity.Player, level: Level): Action = Action.Wait
   }
