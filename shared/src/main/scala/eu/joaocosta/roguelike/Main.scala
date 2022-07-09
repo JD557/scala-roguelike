@@ -24,7 +24,7 @@ object Main extends MinartApp {
   val renderFrame = (appState: AppState) =>
     appState match {
       case Leaving => CanvasIO.pure(appState)
-      case state: InGame =>
+      case state: (InGame | GameOver) =>
         for {
           _       <- CanvasIO.redraw
           input   <- CanvasIO.getKeyboardInput

@@ -89,6 +89,8 @@ object AppStateRenderer extends ChainingSyntax {
         .pipe(printSelectedEntities(inGame, pointerPos))
         .pipe(putGameMessages(inGame))
         .pipe(putPlayerStatus(inGame))
+    case gameOver: GameOver =>
+      toWindow(gameOver.finalState, pointerPos)
     case _ => Window.empty
   }
 }

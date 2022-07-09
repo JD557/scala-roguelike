@@ -35,7 +35,8 @@ object AppState {
     val entities: List[Entity] =
       List(player) ++ currentLevel.npcs
 
-    def printLine(message: Constants.Message) = copy(messages = (message :: messages).take(Constants.maxMessages))
+    def printLine(message: Constants.Message): InGame =
+      copy(messages = (message :: messages).take(Constants.maxMessages))
 
     def applyAction(action: Action): AppState = action match {
       case Action.QuitGame => Leaving
@@ -73,16 +74,23 @@ object AppState {
       case Action.NpcAttack(npc) =>
         val damage    = npc.fighter.fold(0)(_.computeDamage(player.fighter))
         val newPlayer = player.applyDamage(damage)
-        val message =
-          if (newPlayer.fighter.exists(_.isDead)) Constants.Message.KilledBy(npc.name)
-          else Constants.Message.DamagedBy(npc.name, damage)
-        printLine(message).copy(player = newPlayer)
+        if (newPlayer.fighter.exists(_.isDead))
+          GameOver(finalState = printLine(Constants.Message.KilledBy(npc.name)).copy(player = newPlayer))
+        else
+          printLine(Constants.Message.DamagedBy(npc.name, damage)).copy(player = newPlayer)
       case Action.NpcTurn =>
         currentLevel.npcs.foldLeft(this: AppState) { case (st, npc) =>
           npc.ai.fold(st)(ai => st.applyAction(ai.nextAction(npc, player, currentLevel)))
         }
       case Action.Stare(source, destination) =>
         printLine(Constants.Message.Stare(source.name, destination.name))
+    }
+  }
+
+  case class GameOver(finalState: InGame) extends AppState {
+    def applyAction(action: Action): AppState = action match {
+      case Action.QuitGame => Leaving
+      case _               => this
     }
   }
 

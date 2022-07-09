@@ -19,9 +19,11 @@ sealed trait Entity {
 
 object Entity {
   case class Player(x: Int, y: Int, fighter: Option[Fighter] = Some(Fighter(30, 30, 5, 2))) extends Entity {
-    val name   = "Player"
-    val sprite = Window.Sprite('@', Constants.Pallete.white)
-    val ai     = None
+    val name = "Player"
+    def sprite =
+      if (fighter.map(_.hp).contains(0)) Window.Sprite('%', Constants.Pallete.white)
+      else Window.Sprite('@', Constants.Pallete.white)
+    val ai = None
 
     def move(dx: Int, dy: Int): Player   = copy(x = x + dx, y = y + dy)
     def applyDamage(damage: Int): Player = copy(fighter = fighter.map(_.applyDamage(damage)))
