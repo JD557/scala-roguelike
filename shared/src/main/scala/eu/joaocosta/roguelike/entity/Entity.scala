@@ -14,18 +14,20 @@ sealed trait Entity {
 }
 
 object Entity {
-  case class Player(x: Int, y: Int, fighter: Fighter = Fighter(30, 30, 5, 2))
+  case class Player(x: Int, y: Int, fighter: Fighter = Fighter(30, 30, 5, 2), inventory: Inventory = Inventory(Nil, 26))
       extends Entity
       with Moveable.Component[Player]
-      with Fighter.Component[Player] {
+      with Fighter.Component[Player]
+      with Inventory.Component[Player] {
     val name = "Player"
     val sprite =
       if (fighter.isDead) Window.Sprite('%', Constants.Pallete.white)
       else Window.Sprite('@', Constants.Pallete.white)
     val isWalkable = false
 
-    def move(dx: Int, dy: Int): Player               = copy(x = x + dx, y = y + dy)
-    def updateFighter(f: Fighter => Fighter): Player = copy(fighter = f(fighter))
+    def move(dx: Int, dy: Int): Player                     = copy(x = x + dx, y = y + dy)
+    def updateFighter(f: Fighter => Fighter): Player       = copy(fighter = f(fighter))
+    def updateInventory(f: Inventory => Inventory): Player = copy(inventory = f(inventory))
   }
 
   sealed trait Npc extends Entity with Moveable.Component[Npc] with Fighter.Component[Npc] with Behavior.Component {
@@ -55,10 +57,12 @@ object Entity {
     val x = of.x
     val y = of.y
   }
-  case class HealingPotion(x: Int, y: Int) extends Entity with Consumable.Component {
-    val name       = "Healing potion"
-    val sprite     = Window.Sprite('!', Constants.Pallete.lightBlue)
+  sealed trait Item extends Entity with Consumable.Component {
     val isWalkable = true
+  }
+  case class HealingPotion(x: Int, y: Int) extends Item {
+    val name   = "Healing potion"
+    val sprite = Window.Sprite('!', Constants.Pallete.lightBlue)
     def consumeResult(target: Entity) = target match {
       case entity: FighterEntity => List(Action.Heal(entity, 4))
       case _                     => List(Action.NothingHappened)

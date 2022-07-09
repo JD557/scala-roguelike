@@ -16,9 +16,9 @@ case class Level(
     gameMap.tiles.get((x, y)).forall(_.walkable) && !entities.exists(e => !e.isWalkable && x == e.x && y == e.y)
 
   def updateEntity(from: Entity, to: Option[Entity]) = {
-    val withoutEntity = entities.filterNot(_ == from)
-    if (withoutEntity.size == entities.size) this
-    else copy(entities = to.fold(withoutEntity)(entity => entity :: withoutEntity))
+    val (left, right) = entities.span(_ != from)
+    if (right.isEmpty) this
+    else copy(entities = left ++ to.toList ++ right.tail)
   }
 
   def pathfind(x1: Int, y1: Int, x2: Int, y2: Int): List[(Int, Int)] = {

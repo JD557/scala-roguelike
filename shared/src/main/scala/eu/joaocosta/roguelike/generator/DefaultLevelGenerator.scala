@@ -12,13 +12,19 @@ case class DefaultLevelGenerator(
     roomMaxSize: Int,
     roomMinSize: Int,
     maxRooms: Int,
-    maxMonsters: Int
+    maxMonsters: Int,
+    maxItems: Int
 ) extends LevelGenerator {
 
   def generateEnemies(room: Room, random: Random): List[Entity.Npc] =
     LevelGenerator.randomEntityPositions(room, maxMonsters, random).map { case (x, y) =>
       if (random.nextDouble() < 0.2) Entity.Troll(x, y)
       else Entity.Orc(x, y)
+    }
+
+  def generateItems(room: Room, random: Random): List[Entity.Item] =
+    LevelGenerator.randomEntityPositions(room, maxItems, random).map { case (x, y) =>
+      Entity.HealingPotion(x, y)
     }
 
   def generateLevel(random: Random): Level = {
@@ -63,7 +69,7 @@ case class DefaultLevelGenerator(
     Level(
       playerStart = Entity.Player(rooms.head.center._1, rooms.head.center._2),
       gameMap = GameMap(map),
-      entities = rooms.tail.flatMap(room => generateEnemies(room, random))
+      entities = rooms.tail.flatMap(room => generateEnemies(room, random) ++ generateItems(room, random))
     )
   }
 }

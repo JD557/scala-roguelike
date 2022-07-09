@@ -17,7 +17,8 @@ object Constants {
     roomMaxSize = 10,
     roomMinSize = 6,
     maxRooms = 30,
-    maxMonsters = 2
+    maxMonsters = 2,
+    maxItems = 1
   )
   val maxMessages = screenHeight - levelGenerator.height - 1
   val hpBarSize   = 20
@@ -60,6 +61,12 @@ object Constants {
         )
     case Stare(source: Entity, target: Entity)
         extends Message(s"${source.name} is looking at ${target.name}", Constants.Pallete.gray)
+    case UsedItem(source: Entity, target: Entity, item: Entity)
+        extends Message(
+          if (source == target) s"${source.name} used a ${item.name}"
+          else s"${source.name} used a ${item.name} on ${target.name}",
+          Constants.Pallete.gray
+        )
     case NothingHappened extends Message("Nothing happened...", Constants.Pallete.gray)
   }
   object Message {

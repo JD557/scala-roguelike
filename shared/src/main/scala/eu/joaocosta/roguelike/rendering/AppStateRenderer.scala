@@ -71,9 +71,14 @@ object AppStateRenderer extends ChainingSyntax {
         s"ATK: ${state.player.fighter.attack}"
       )
       .printLine(
+        11,
+        Constants.screenHeight - Constants.maxMessages + 1,
+        s"DEF: ${state.player.fighter.defense}"
+      )
+      .printLine(
         1,
         Constants.screenHeight - Constants.maxMessages + 2,
-        s"DEF: ${state.player.fighter.defense}"
+        s"CAP: ${state.player.inventory.items.size}/${state.player.inventory.capacity}"
       )
   }
 

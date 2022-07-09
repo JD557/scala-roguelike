@@ -13,6 +13,7 @@ enum Action {
   case Movement(target: MoveableEntity, dx: Int, dy: Int)
   case Attack(source: FighterEntity, target: FighterEntity)
   case Heal(target: FighterEntity, amount: Int)
+  case UseItem(source: Entity, target: Entity, item: ConsumableEntity)
   case NpcTurn
 }
 

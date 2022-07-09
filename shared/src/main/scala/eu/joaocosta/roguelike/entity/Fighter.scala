@@ -1,8 +1,7 @@
 package eu.joaocosta.roguelike.entity
 
 case class Fighter(hp: Int, maxHp: Int, attack: Int, defense: Int) {
-  val isDead: Boolean      = hp <= 0
-  val statusString: String = s"HP: $hp/$maxHp | ATK: $attack | DEF: $defense"
+  val isDead: Boolean = hp <= 0
   def computeDamage(that: Fighter): Int =
     math.min(math.max(0, this.attack - that.defense), that.hp)
   def updateHp(dHp: Int): Fighter =

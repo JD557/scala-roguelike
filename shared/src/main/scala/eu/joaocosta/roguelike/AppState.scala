@@ -102,6 +102,9 @@ object AppState {
         if (effectiveAmount <= 0) applyAction(Action.NothingHappened)
         else
           printLine(Constants.Message.Healed(target, effectiveAmount)).updateEntity(target, newTarget)
+      case Action.UseItem(source, target, item) =>
+        printLine(Constants.Message.UsedItem(source, target, item)).applyActions(item.consumeResult(target))
+
       case Action.NpcTurn =>
         currentLevel.npcs.foldLeft(this: AppState) { case (st, npc) =>
           st.applyAction(npc.ai.nextAction(npc, player, currentLevel))
