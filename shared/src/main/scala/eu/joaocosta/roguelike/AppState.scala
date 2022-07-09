@@ -50,7 +50,7 @@ object AppState {
       case Action.NothingHappened =>
         printLine(Constants.Message.NothingHappened)
       case Action.Stare(source, destination) =>
-        printLine(Constants.Message.Stare(source.name, destination.name))
+        printLine(Constants.Message.Stare(source, destination))
       case Action.PlayerMovement(dx, dy) =>
         val nextX = player.x + dx
         val nextY = player.y + dy
@@ -82,8 +82,8 @@ object AppState {
         val damage    = source.fighter.computeDamage(target.fighter)
         val newTarget = target.applyDamage(damage)
         val message =
-          if (target.fighter.isDead) Constants.Message.Killed(source.name, target.name)
-          else Constants.Message.Damaged(source.name, target.name, damage)
+          if (target.fighter.isDead) Constants.Message.Killed(source, target)
+          else Constants.Message.Damaged(source, target, damage)
         newTarget match {
           case newPlayer: Entity.Player =>
             if (newPlayer.fighter.isDead)
@@ -101,7 +101,7 @@ object AppState {
         val effectiveAmount = newTarget.fighter.hp - target.fighter.hp
         if (effectiveAmount <= 0) applyAction(Action.NothingHappened)
         else
-          printLine(Constants.Message.Healed(target.name, effectiveAmount)).updateEntity(target, newTarget)
+          printLine(Constants.Message.Healed(target, effectiveAmount)).updateEntity(target, newTarget)
       case Action.NpcTurn =>
         currentLevel.npcs.foldLeft(this: AppState) { case (st, npc) =>
           st.applyAction(npc.ai.nextAction(npc, player, currentLevel))

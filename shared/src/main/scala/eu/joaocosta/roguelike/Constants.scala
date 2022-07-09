@@ -1,6 +1,7 @@
 package eu.joaocosta.roguelike
 
 import eu.joaocosta.minart.graphics._
+import eu.joaocosta.roguelike.entity.Entity
 
 object Constants {
   val screenWidth  = 80
@@ -42,14 +43,27 @@ object Constants {
 
   enum Message(val text: String, val color: Color) {
     case Welcome extends Message("Welcome to the Dungeon!", Constants.Pallete.blue)
-    case Killed(source: String, target: String)
-        extends Message(s"The ${source} killed the ${target}", Constants.Pallete.orange)
-    case Damaged(source: String, target: String, damage: Int)
-        extends Message(s"The ${source} kicked the ${target} for ${damage} damage", Constants.Pallete.white)
-    case Healed(target: String, effectiveAmount: Int)
-        extends Message(s"${target} recovered ${effectiveAmount} HP", Constants.Pallete.green)
-    case Stare(source: String, target: String)
-        extends Message(s"${source} is looking at ${target}", Constants.Pallete.gray)
+    case Killed(source: Entity, target: Entity)
+        extends Message(
+          s"The ${source.name} killed the ${target.name}",
+          Message.ifPlayer(target, Constants.Pallete.red, Constants.Pallete.orange)
+        )
+    case Damaged(source: Entity, target: Entity, damage: Int)
+        extends Message(
+          s"The ${source.name} kicked the ${target.name} for ${damage} damage",
+          Message.ifPlayer(target, Constants.Pallete.lightRed, Constants.Pallete.white)
+        )
+    case Healed(target: Entity, effectiveAmount: Int)
+        extends Message(
+          s"${target.name} recovered ${effectiveAmount} HP",
+          Message.ifPlayer(target, Constants.Pallete.green, Constants.Pallete.darkGreen)
+        )
+    case Stare(source: Entity, target: Entity)
+        extends Message(s"${source.name} is looking at ${target.name}", Constants.Pallete.gray)
     case NothingHappened extends Message("Nothing happened...", Constants.Pallete.gray)
+  }
+  object Message {
+    private def ifPlayer[T](entity: Entity, whenTrue: T, whenFalse: T) =
+      if (entity.isInstanceOf[Entity.Player]) whenTrue else whenFalse
   }
 }
