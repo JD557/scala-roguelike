@@ -34,8 +34,11 @@ object AppStateRenderer extends ChainingSyntax {
     window.addTiles(tileMap).addTiles(entitySprites)
   }
 
-  private def putGameMessages(state: InGame)(window: Window): Window = {
-    state.messages.zipWithIndex
+  private def putGameMessages(state: InGame, limit: Int, scroll: Int)(window: Window): Window = {
+    state.messages
+      .drop(scroll)
+      .take(limit)
+      .zipWithIndex
       .foldLeft(window) { case (win, (message, y)) =>
         win.printLine(Constants.hpBarSize + 1, Constants.screenHeight - 1 - y, message.text, message.color)
       }
@@ -89,10 +92,14 @@ object AppStateRenderer extends ChainingSyntax {
       Window.empty
         .pipe(putGameTiles(inGame))
         .pipe(printSelectedEntities(inGame, pointerPos))
-        .pipe(putGameMessages(inGame))
+        .pipe(putGameMessages(inGame, Constants.maxMessages, 0))
         .pipe(putPlayerStatus(inGame))
     case gameOver: GameOver =>
       toWindow(gameOver.finalState, pointerPos)
+    case historyView: HistoryView =>
+      Window.empty
+        .pipe(putGameMessages(historyView.currentState, Constants.screenHeight, historyView.scroll))
+        .pipe(putPlayerStatus(historyView.currentState))
     case _ => Window.empty
   }
 }

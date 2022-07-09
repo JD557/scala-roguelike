@@ -36,11 +36,12 @@ object AppState {
       List(player) ++ currentLevel.entities
 
     def printLine(message: Constants.Message): InGame =
-      copy(messages = (message :: messages).take(Constants.maxMessages))
+      copy(messages = (message :: messages))
 
     def applyAction(action: Action): AppState = action match {
-      case Action.QuitGame => Leaving
-      case Action.Wait     => this
+      case Action.QuitGame            => Leaving
+      case Action.SwitchHistoryViewer => HistoryView(this, 0)
+      case Action.Wait                => this
       case Action.PlayerMovement(dx, dy) =>
         val nextX = player.x + dx
         val nextY = player.y + dy
@@ -84,6 +85,18 @@ object AppState {
         }
       case Action.Stare(source, destination) =>
         printLine(Constants.Message.Stare(source.name, destination.name))
+    }
+  }
+
+  case class HistoryView(currentState: InGame, scroll: Int) extends AppState {
+    def applyAction(action: Action): AppState = action match {
+      case Action.QuitGame            => Leaving
+      case Action.SwitchHistoryViewer => currentState
+      case Action.PlayerMovement(_, dy) =>
+        val nextScroll = scroll - dy
+        if (nextScroll < 0 || nextScroll >= currentState.messages.size) this
+        else copy(scroll = nextScroll)
+      case _ => this
     }
   }
 

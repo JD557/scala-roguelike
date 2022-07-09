@@ -12,6 +12,7 @@ enum Action {
   case NpcTurn
   case Wait
   case Stare(source: Entity, destination: Entity)
+  case SwitchHistoryViewer
 }
 
 object Action {
@@ -23,6 +24,7 @@ object Action {
       case KeyboardInput.Key.Left   => List(PlayerMovement(-1, 0))
       case KeyboardInput.Key.Right  => List(PlayerMovement(1, 0))
       case KeyboardInput.Key.Space  => List(NpcTurn)
+      case KeyboardInput.Key.V      => List(SwitchHistoryViewer)
       case _                        => Nil
     }
   }
