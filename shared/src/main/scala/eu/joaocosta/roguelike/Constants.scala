@@ -41,14 +41,15 @@ object Constants {
   }
 
   enum Message(val text: String, val color: Color) {
-    case Welcome                    extends Message("Welcome to the Dungeon!", Constants.Pallete.blue)
-    case KilledNpc(npcName: String) extends Message(s"You killed the ${npcName}", Constants.Pallete.orange)
-    case DamagedNpc(npcName: String, damage: Int)
-        extends Message(s"You kicked the ${npcName} for ${damage} damage", Constants.Pallete.white)
-    case KilledBy(npcName: String) extends Message(s"You have been killed by ${npcName}", Constants.Pallete.red)
-    case DamagedBy(npcName: String, damage: Int)
-        extends Message(s"${npcName} kicked you for ${damage} damage", Constants.Pallete.lightRed)
-    case Stare(source: String, destination: String)
-        extends Message(s"${source} is looking at ${destination}", Constants.Pallete.gray)
+    case Welcome extends Message("Welcome to the Dungeon!", Constants.Pallete.blue)
+    case Killed(source: String, target: String)
+        extends Message(s"The ${source} killed the ${target}", Constants.Pallete.orange)
+    case Damaged(source: String, target: String, damage: Int)
+        extends Message(s"The ${source} kicked the ${target} for ${damage} damage", Constants.Pallete.white)
+    case Healed(target: String, effectiveAmount: Int)
+        extends Message(s"${target} recovered ${effectiveAmount} HP", Constants.Pallete.green)
+    case Stare(source: String, target: String)
+        extends Message(s"${source} is looking at ${target}", Constants.Pallete.gray)
+    case NothingHappened extends Message("Nothing happened...", Constants.Pallete.gray)
   }
 }

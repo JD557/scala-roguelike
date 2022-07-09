@@ -1,18 +1,19 @@
 package eu.joaocosta.roguelike
 
 import eu.joaocosta.minart.input._
-import eu.joaocosta.roguelike.entity.Entity
+import eu.joaocosta.roguelike.entity._
 
 enum Action {
   case QuitGame
-  case PlayerMovement(dx: Int, dy: Int)
-  case PlayerAttack(npc: Entity.Npc)
-  case NpcMovement(npc: Entity.Npc, dx: Int, dy: Int)
-  case NpcAttack(npc: Entity.Npc)
-  case NpcTurn
-  case Wait
-  case Stare(source: Entity, destination: Entity)
   case SwitchHistoryViewer
+  case Wait
+  case NothingHappened
+  case Stare(source: Entity, destination: Entity)
+  case PlayerMovement(dx: Int, dy: Int)
+  case Movement(target: MoveableEntity, dx: Int, dy: Int)
+  case Attack(source: FighterEntity, target: FighterEntity)
+  case Heal(target: FighterEntity, amount: Int)
+  case NpcTurn
 }
 
 object Action {

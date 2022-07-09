@@ -3,7 +3,7 @@ package eu.joaocosta.roguelike
 import scala.util.Random
 
 import eu.joaocosta.roguelike.AppState._
-import eu.joaocosta.roguelike.entity.Entity
+import eu.joaocosta.roguelike.entity._
 
 sealed trait AppState {
   def applyAction(action: Action): AppState
@@ -29,6 +29,11 @@ object AppState {
       messages: List[Constants.Message]
   ) extends AppState {
 
+    def updateEntity(oldEntity: Entity, newEntity: Entity): InGame = newEntity match {
+      case p: Entity.Player => copy(player = p)
+      case _                => copy(currentLevel = currentLevel.updateEntity(oldEntity, Some(newEntity)))
+    }
+
     val visibleTiles: Set[(Int, Int)] =
       currentLevel.gameMap.visibleFrom(player.x, player.y, Constants.playerVision)
 
@@ -42,49 +47,65 @@ object AppState {
       case Action.QuitGame            => Leaving
       case Action.SwitchHistoryViewer => HistoryView(this, 0)
       case Action.Wait                => this
+      case Action.NothingHappened =>
+        printLine(Constants.Message.NothingHappened)
+      case Action.Stare(source, destination) =>
+        printLine(Constants.Message.Stare(source.name, destination.name))
       case Action.PlayerMovement(dx, dy) =>
         val nextX = player.x + dx
         val nextY = player.y + dy
-        val nextState =
-          if (currentLevel.isWalkable(nextX, nextY))
-            copy(player = player.move(dx, dy), exploredTiles = exploredTiles ++ visibleTiles)
-          else
-            currentLevel.npcs.find(npc => npc.x == nextX && npc.y == nextY) match {
-              case Some(npc) => applyAction(Action.PlayerAttack(npc))
-              case None      => this
-            }
-        nextState.applyAction(Action.NpcTurn)
-      case Action.PlayerAttack(npc) =>
-        val damage = player.fighter.computeDamage(npc.fighter)
-        val newNpc = npc.applyDamage(damage)
-        val message =
-          if (newNpc.fighter.isDead) Constants.Message.KilledNpc(npc.name)
-          else Constants.Message.DamagedNpc(npc.name, damage)
-        printLine(message).copy(currentLevel =
-          currentLevel.updateEntity(npc, Some(if (!newNpc.fighter.isDead) newNpc else Entity.Corpse(newNpc)))
-        )
-      case Action.NpcMovement(npc, dx, dy) =>
-        val nextX = npc.x + dx
-        val nextY = npc.y + dy
-        if (nextX == player.x && nextY == player.y)
-          applyAction(Action.NpcAttack(npc))
-        else if (currentLevel.isWalkable(nextX, nextY))
-          copy(currentLevel = currentLevel.updateEntity(npc, Some(npc.move(dx, dy))))
+        if (currentLevel.isWalkable(nextX, nextY) || currentLevel.npcs.exists(npc => npc.x == nextX && npc.y == nextY))
+          applyAction(Action.Movement(player, dx, dy)).applyAction(Action.NpcTurn)
         else
           this
-      case Action.NpcAttack(npc) =>
-        val damage    = npc.fighter.computeDamage(player.fighter)
-        val newPlayer = player.applyDamage(damage)
-        if (newPlayer.fighter.isDead)
-          GameOver(finalState = printLine(Constants.Message.KilledBy(npc.name)).copy(player = newPlayer))
+      case Action.Movement(player: Entity.Player, dx, dy) =>
+        val nextX = player.x + dx
+        val nextY = player.y + dy
+        if (currentLevel.isWalkable(nextX, nextY))
+          copy(player = player.move(dx, dy), exploredTiles = exploredTiles ++ visibleTiles)
         else
-          printLine(Constants.Message.DamagedBy(npc.name, damage)).copy(player = newPlayer)
+          currentLevel.npcs.find(npc => npc.x == nextX && npc.y == nextY) match {
+            case Some(npc) => applyAction(Action.Attack(player, npc))
+            case None      => this
+          }
+      case Action.Movement(target, dx, dy) =>
+        val nextX     = target.x + dx
+        val nextY     = target.y + dy
+        val hitPlayer = nextX == player.x && nextY == player.y
+        if (currentLevel.isWalkable(nextX, nextY) && !hitPlayer)
+          updateEntity(target, target.move(dx, dy))
+        else if (target.isInstanceOf[FighterEntity] && hitPlayer)
+          applyAction(Action.Attack(target.asInstanceOf[FighterEntity], player))
+        else
+          this
+      case Action.Attack(source, target) =>
+        val damage    = source.fighter.computeDamage(target.fighter)
+        val newTarget = target.applyDamage(damage)
+        val message =
+          if (target.fighter.isDead) Constants.Message.Killed(source.name, target.name)
+          else Constants.Message.Damaged(source.name, target.name, damage)
+        newTarget match {
+          case newPlayer: Entity.Player =>
+            if (newPlayer.fighter.isDead)
+              GameOver(finalState = printLine(message).copy(player = newPlayer))
+            else
+              printLine(message).updateEntity(player, newPlayer)
+          case _ =>
+            printLine(message).updateEntity(
+              target,
+              if (!newTarget.fighter.isDead) newTarget else Entity.Corpse(newTarget)
+            )
+        }
+      case Action.Heal(target, amount) =>
+        val newTarget       = target.heal(amount)
+        val effectiveAmount = newTarget.fighter.hp - target.fighter.hp
+        if (effectiveAmount <= 0) applyAction(Action.NothingHappened)
+        else
+          printLine(Constants.Message.Healed(target.name, effectiveAmount)).updateEntity(target, newTarget)
       case Action.NpcTurn =>
         currentLevel.npcs.foldLeft(this: AppState) { case (st, npc) =>
           st.applyAction(npc.ai.nextAction(npc, player, currentLevel))
         }
-      case Action.Stare(source, destination) =>
-        printLine(Constants.Message.Stare(source.name, destination.name))
     }
   }
 

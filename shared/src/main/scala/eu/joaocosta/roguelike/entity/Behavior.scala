@@ -30,7 +30,7 @@ object Behavior {
           case (nextX, nextY) :: _ =>
             val dx = nextX - entity.x
             val dy = nextY - entity.y
-            Action.NpcMovement(entity, dx, dy)
+            Action.Movement(entity, dx, dy)
         }
       } else Action.Wait
   }

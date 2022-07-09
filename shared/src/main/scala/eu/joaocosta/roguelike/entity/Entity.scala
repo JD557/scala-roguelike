@@ -1,8 +1,8 @@
 package eu.joaocosta.roguelike.entity
 
 import eu.joaocosta.minart.graphics._
-import eu.joaocosta.roguelike.Constants
 import eu.joaocosta.roguelike.rendering.Window
+import eu.joaocosta.roguelike.{Action, Constants}
 
 sealed trait Entity {
   def x: Int
@@ -54,5 +54,14 @@ object Entity {
 
     val x = of.x
     val y = of.y
+  }
+  case class HealingPotion(x: Int, y: Int) extends Entity with Consumable.Component {
+    val name       = "Healing potion"
+    val sprite     = Window.Sprite('!', Constants.Pallete.lightBlue)
+    val isWalkable = true
+    def consumeResult(target: Entity) = target match {
+      case entity: FighterEntity => List(Action.Heal(entity, 4))
+      case _                     => List(Action.NothingHappened)
+    }
   }
 }
