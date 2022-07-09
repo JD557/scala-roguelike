@@ -13,6 +13,11 @@ case class Window(tiles: Map[(Int, Int), Window.Sprite]) {
   def printLine(x: Int, y: Int, string: String, fg: Color = Color(255, 255, 255), bg: Color = Color(0, 0, 0)): Window =
     addTiles(string.zipWithIndex.map { case (char, dx) => (x + dx, y) -> Window.Sprite(char, fg, bg) })
 
+  def invertColors(x: Int, y: Int): Window = tiles.get((x, y)) match {
+    case None         => this
+    case Some(sprite) => addTiles(List((x, y) -> sprite.copy(fg = sprite.bg, bg = sprite.fg)))
+  }
+
   def render(tileset: SpriteSheet): CanvasIO[Unit] = {
     CanvasIO.foreach(tiles) { case ((x, y), Window.Sprite(char, fg, bg)) =>
       val sprite = tileset.getSprite(char.toInt).map {

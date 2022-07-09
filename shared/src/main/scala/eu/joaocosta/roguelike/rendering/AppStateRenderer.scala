@@ -5,13 +5,15 @@ import scala.util.ChainingSyntax
 import eu.joaocosta.minart.graphics._
 import eu.joaocosta.minart.graphics.image._
 import eu.joaocosta.minart.graphics.pure._
+import eu.joaocosta.minart.input._
 import eu.joaocosta.roguelike.AppState._
-import eu.joaocosta.roguelike.entity.Fighter
+import eu.joaocosta.roguelike.entity._
 import eu.joaocosta.roguelike.{AppState, Constants, GameMap}
 
 object AppStateRenderer extends ChainingSyntax {
 
-  def render(state: AppState, tileset: SpriteSheet): CanvasIO[Unit] = toWindow(state).render(tileset)
+  def render(state: AppState, tileset: SpriteSheet, pointer: PointerInput): CanvasIO[Unit] =
+    toWindow(state, pointer.position).render(tileset)
 
   private def putGameTiles(state: InGame)(window: Window): Window = {
     def tileSprite(pos: (Int, Int), tile: GameMap.Tile): Option[Window.Sprite] =
@@ -70,9 +72,23 @@ object AppStateRenderer extends ChainingSyntax {
       )
   }
 
-  def toWindow(state: AppState): Window = state match {
+  private def printSelectedEntities(state: InGame, pointerPos: Option[PointerInput.Position])(
+      window: Window
+  ): Window = {
+    val selectedTile     = pointerPos.map(pos => (pos.x / Constants.spriteWidth, pos.y / Constants.spriteHeight))
+    val selectedEntities = state.entities.filter(e => selectedTile.exists { case (px, py) => px == e.x && py == e.y })
+    selectedTile
+      .fold(window) { case (px, py) => window.invertColors(px, py) }
+      .printLine(1, Constants.screenHeight - 1, selectedEntities.map(_.name).mkString(", "))
+  }
+
+  def toWindow(state: AppState, pointerPos: Option[PointerInput.Position]): Window = state match {
     case inGame: InGame =>
-      Window.empty.pipe(putGameMessages(inGame)).pipe(putGameTiles(inGame)).pipe(putPlayerStatus(inGame))
+      Window.empty
+        .pipe(putGameTiles(inGame))
+        .pipe(printSelectedEntities(inGame, pointerPos))
+        .pipe(putGameMessages(inGame))
+        .pipe(putPlayerStatus(inGame))
     case _ => Window.empty
   }
 }

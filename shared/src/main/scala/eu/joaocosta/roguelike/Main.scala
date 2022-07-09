@@ -26,10 +26,11 @@ object Main extends MinartApp {
       case Leaving => CanvasIO.pure(appState)
       case state: InGame =>
         for {
-          _     <- CanvasIO.redraw
-          input <- CanvasIO.getKeyboardInput
-          _     <- CanvasIO.clear()
-          _     <- AppStateRenderer.render(state, Resources.richFont)
+          _       <- CanvasIO.redraw
+          input   <- CanvasIO.getKeyboardInput
+          pointer <- CanvasIO.getPointerInput
+          _       <- CanvasIO.clear()
+          _       <- AppStateRenderer.render(state, Resources.richFont, pointer)
           actions   = Action.getActions(input)
           nextState = state.applyActions(actions)
         } yield nextState
