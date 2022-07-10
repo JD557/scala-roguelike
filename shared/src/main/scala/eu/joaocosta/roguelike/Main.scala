@@ -31,7 +31,7 @@ object Main extends MinartApp {
           pointer <- CanvasIO.getPointerInput
           _       <- CanvasIO.clear()
           _       <- AppStateRenderer.render(state, Resources.richFont, pointer)
-          actions   = Action.getActions(input)
+          actions   = Action.getActions(state, input)
           nextState = state.applyActions(actions)
         } yield nextState
     }

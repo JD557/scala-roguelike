@@ -121,6 +121,7 @@ object AppState {
         currentLevel.npcs.foldLeft(this: AppState) { case (st, npc) =>
           st.applyAction(npc.ai.nextAction(npc, player, currentLevel))
         }
+      case _ => this
     }
   }
 
@@ -128,8 +129,8 @@ object AppState {
     def applyAction(action: Action): AppState = action match {
       case Action.QuitGame            => Leaving
       case Action.SwitchHistoryViewer => currentState
-      case Action.PlayerMovement(_, dy) =>
-        val nextScroll = scroll - dy
+      case Action.ScrollLog(dy) =>
+        val nextScroll = scroll + dy
         if (nextScroll < 0 || nextScroll >= currentState.messages.size) this
         else copy(scroll = nextScroll)
       case _ => this
