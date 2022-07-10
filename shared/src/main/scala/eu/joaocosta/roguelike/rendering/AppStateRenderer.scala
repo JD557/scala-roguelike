@@ -1,5 +1,6 @@
 package eu.joaocosta.roguelike.rendering
 
+import scala.annotation.tailrec
 import scala.util.ChainingSyntax
 
 import eu.joaocosta.minart.graphics._
@@ -14,6 +15,26 @@ object AppStateRenderer extends ChainingSyntax {
 
   def render(state: AppState, tileset: SpriteSheet, pointer: PointerInput): CanvasIO[Unit] =
     toWindow(state, pointer.position).render(tileset)
+
+  private def addPopup(x1: Int, y1: Int, x2: Int, y2: Int, title: String, subWindow: Window)(window: Window): Window = {
+    window
+      .putBorders(
+        x1,
+        y1,
+        x2,
+        y2,
+        fg = Constants.Pallete.white,
+        bg = Constants.Pallete.black
+      )
+      .printLine(
+        x1 + 1,
+        y1,
+        title,
+        fg = Constants.Pallete.black,
+        bg = Constants.Pallete.white
+      )
+      .putWindow(x1 + 1, y1 + 1, subWindow)
+  }
 
   private def putGameTiles(state: InGame)(window: Window): Window = {
     def tileSprite(pos: (Int, Int), tile: GameMap.Tile): Option[Window.Sprite] =
@@ -34,23 +55,41 @@ object AppStateRenderer extends ChainingSyntax {
     window.addTiles(tileMap).addTiles(entitySprites)
   }
 
+  private def wrapText(str: String, lineWidth: Int): List[String] = {
+    @tailrec
+    def loop(fit: String, dontFit: List[String]): (String, String) =
+      (fit, dontFit) match {
+        case (_, w :: ws) if fit.size + w.size + 1 <= lineWidth => loop(fit + " " + w, ws)
+        case _                                                  => (fit, dontFit.mkString(" "))
+      }
+    if (str.isEmpty) Nil
+    else {
+      val words          = str.split(" ").toList
+      val (fit, dontFit) = loop(words.head, words.tail)
+      fit :: wrapText(dontFit, lineWidth)
+    }
+  }
+
   private def putGameMessages(state: InGame, limit: Int, scroll: Int)(window: Window): Window = {
-    val borders =
-      window
-        .addBorders(
-          Constants.popUpX,
-          Constants.screenHeight - 2 - limit,
-          Constants.popUpX + Constants.popUpW,
-          Constants.screenHeight - 1
-        )
-        .printLine(Constants.popUpX + 1, Constants.screenHeight - 2 - limit, "Message Log")
-    state.messages
+    val charLimit = Constants.popUpW - 1
+    val wrappedMessages = state.messages.flatMap { case msg =>
+      wrapText(msg.text, charLimit).map(txt => txt -> msg.color).reverse
+    }
+    val subwindow = wrappedMessages
       .drop(scroll)
       .take(limit)
       .zipWithIndex
-      .foldLeft(borders) { case (win, (message, y)) =>
-        win.printLine(Constants.popUpX + 1, Constants.screenHeight - 2 - y, message.text, message.color)
+      .foldLeft(Window.empty) { case (win, ((text, color), y)) =>
+        win.printLine(0, limit - 1 - y, text, color)
       }
+    addPopup(
+      Constants.popUpX,
+      Constants.screenHeight - 2 - limit,
+      Constants.popUpX + Constants.popUpW,
+      Constants.screenHeight - 1,
+      "Message Log",
+      subwindow
+    )(window)
   }
 
   private def putPlayerStatus(state: InGame)(window: Window): Window = {
@@ -104,24 +143,24 @@ object AppStateRenderer extends ChainingSyntax {
   private def printInventory(state: InventoryView)(
       window: Window
   ): Window = {
-    val borders = window
-      .addBorders(
-        Constants.popUpX,
-        0,
-        Constants.popUpX + Constants.popUpW,
-        Constants.screenHeight - 1
-      )
-      .printLine(Constants.popUpX + 1, 0, "Inventory")
-    state.currentState.player.inventory.items.zipWithIndex
-      .foldLeft(borders) { case (window, (item, idx)) =>
+    val subwindow = state.currentState.player.inventory.items.zipWithIndex
+      .foldLeft(Window.empty) { case (window, (item, idx)) =>
         window.printLine(
-          Constants.popUpX + 1,
+          0,
           idx + 1,
           item.name,
           Constants.Pallete.white,
           if (state.cursor == idx) Constants.Pallete.darkGray else Constants.Pallete.black
         )
       }
+    addPopup(
+      Constants.popUpX,
+      0,
+      Constants.popUpX + Constants.popUpW,
+      Constants.screenHeight - 1,
+      "Inventory",
+      subwindow
+    )(window)
   }
 
   def toWindow(state: AppState, pointerPos: Option[PointerInput.Position]): Window = state match {
@@ -135,10 +174,12 @@ object AppStateRenderer extends ChainingSyntax {
       toWindow(gameOver.finalState, pointerPos)
     case historyView: HistoryView =>
       Window.empty
+        .pipe(putGameTiles(historyView.currentState))
         .pipe(putGameMessages(historyView.currentState, Constants.screenHeight - 2, historyView.scroll))
         .pipe(putPlayerStatus(historyView.currentState))
     case inventoryView: InventoryView =>
       Window.empty
+        .pipe(putGameTiles(inventoryView.currentState))
         .pipe(printInventory(inventoryView))
         .pipe(putPlayerStatus(inventoryView.currentState))
     case _ => Window.empty

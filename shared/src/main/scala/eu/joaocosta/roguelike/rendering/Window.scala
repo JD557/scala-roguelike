@@ -13,7 +13,10 @@ case class Window(tiles: Map[(Int, Int), Window.Sprite]) {
   def printLine(x: Int, y: Int, string: String, fg: Color = Color(255, 255, 255), bg: Color = Color(0, 0, 0)): Window =
     addTiles(string.zipWithIndex.map { case (char, dx) => (x + dx, y) -> Window.Sprite(char, fg, bg) })
 
-  def addBorders(
+  def putWindow(x: Int, y: Int, window: Window): Window =
+    addTiles(window.tiles.map { case ((xx, yy), v) => (xx + x, yy + y) -> v })
+
+  def putBorders(
       x1: Int,
       y1: Int,
       x2: Int,

@@ -52,13 +52,6 @@ object AppState {
         printLine(Constants.Message.NothingHappened)
       case Action.Stare(source, destination) =>
         printLine(Constants.Message.Stare(source, destination))
-      case Action.PlayerMovement(dx, dy) =>
-        val nextX = player.x + dx
-        val nextY = player.y + dy
-        if (currentLevel.isWalkable(nextX, nextY) || currentLevel.npcs.exists(npc => npc.x == nextX && npc.y == nextY))
-          applyAction(Action.Movement(player, dx, dy)).applyAction(Action.NpcTurn)
-        else
-          this
       case Action.PlayerAction(getActions) =>
         applyActions(getActions(player)).applyAction(Action.NpcTurn)
       case Action.Movement(player: Entity.Player, dx, dy) =>

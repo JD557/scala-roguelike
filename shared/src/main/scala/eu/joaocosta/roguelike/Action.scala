@@ -10,7 +10,6 @@ enum Action {
   case Wait
   case NothingHappened
   case Stare(source: Entity, destination: Entity)
-  case PlayerMovement(dx: Int, dy: Int)
   case PlayerAction(f: Entity.Player => List[Action])
   case PickUp
   case Movement(target: MoveableEntity, dx: Int, dy: Int)
@@ -31,16 +30,15 @@ object Action {
 
   def getInGameActions(keyboard: KeyboardInput): List[Action] =
     keyboard.keysPressed.toList.flatMap {
-      case KeyboardInput.Key.Escape => List(QuitGame)
-      case KeyboardInput.Key.Up     => List(PlayerMovement(0, -1))
-      case KeyboardInput.Key.Down   => List(PlayerMovement(0, 1))
-      case KeyboardInput.Key.Left   => List(PlayerMovement(-1, 0))
-      case KeyboardInput.Key.Right  => List(PlayerMovement(1, 0))
-      case KeyboardInput.Key.Space  => List(NpcTurn)
-      case KeyboardInput.Key.V      => List(SwitchHistoryViewer)
-      case KeyboardInput.Key.I      => List(SwitchInventoryViewer)
-      case KeyboardInput.Key.G      => List(PickUp)
-      case _                        => Nil
+      case KeyboardInput.Key.Up    => List(PlayerAction(p => List(Movement(p, 0, -1))))
+      case KeyboardInput.Key.Down  => List(PlayerAction(p => List(Movement(p, 0, 1))))
+      case KeyboardInput.Key.Left  => List(PlayerAction(p => List(Movement(p, -1, 0))))
+      case KeyboardInput.Key.Right => List(PlayerAction(p => List(Movement(p, 1, 0))))
+      case KeyboardInput.Key.Space => List(NpcTurn)
+      case KeyboardInput.Key.V     => List(SwitchHistoryViewer)
+      case KeyboardInput.Key.I     => List(SwitchInventoryViewer)
+      case KeyboardInput.Key.G     => List(PickUp)
+      case _                       => Nil
     }
 
   def getHistoryViewActions(keyboard: KeyboardInput): List[Action] =
