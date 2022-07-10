@@ -13,7 +13,7 @@ object Constants {
   val playerVision = 8
   val levelGenerator = generator.DefaultLevelGenerator(
     width = 80,
-    height = 45,
+    height = 44,
     roomMaxSize = 10,
     roomMinSize = 6,
     maxRooms = 30,
@@ -22,6 +22,9 @@ object Constants {
   )
   val maxMessages = screenHeight - levelGenerator.height - 1
   val hpBarSize   = 20
+
+  val popUpX = hpBarSize
+  val popUpW = screenWidth - 2 * popUpX
 
   object Pallete { // From http://androidarts.com/palette/16pal.htm
     val black      = Color(0, 0, 0)

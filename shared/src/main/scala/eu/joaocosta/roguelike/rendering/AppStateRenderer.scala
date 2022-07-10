@@ -35,12 +35,21 @@ object AppStateRenderer extends ChainingSyntax {
   }
 
   private def putGameMessages(state: InGame, limit: Int, scroll: Int)(window: Window): Window = {
+    val borders =
+      window
+        .addBorders(
+          Constants.popUpX,
+          Constants.screenHeight - 2 - limit,
+          Constants.popUpX + Constants.popUpW,
+          Constants.screenHeight - 1
+        )
+        .printLine(Constants.popUpX + 1, Constants.screenHeight - 2 - limit, "Message Log")
     state.messages
       .drop(scroll)
       .take(limit)
       .zipWithIndex
-      .foldLeft(window) { case (win, (message, y)) =>
-        win.printLine(Constants.hpBarSize + 1, Constants.screenHeight - 1 - y, message.text, message.color)
+      .foldLeft(borders) { case (win, (message, y)) =>
+        win.printLine(Constants.popUpX + 1, Constants.screenHeight - 2 - y, message.text, message.color)
       }
   }
 
@@ -92,6 +101,29 @@ object AppStateRenderer extends ChainingSyntax {
       .printLine(1, Constants.screenHeight - 1, selectedEntities.map(_.name).mkString(", "))
   }
 
+  private def printInventory(state: InventoryView)(
+      window: Window
+  ): Window = {
+    val borders = window
+      .addBorders(
+        Constants.popUpX,
+        0,
+        Constants.popUpX + Constants.popUpW,
+        Constants.screenHeight - 1
+      )
+      .printLine(Constants.popUpX + 1, 0, "Inventory")
+    state.currentState.player.inventory.items.zipWithIndex
+      .foldLeft(borders) { case (window, (item, idx)) =>
+        window.printLine(
+          Constants.popUpX + 1,
+          idx + 1,
+          item.name,
+          Constants.Pallete.white,
+          if (state.cursor == idx) Constants.Pallete.darkGray else Constants.Pallete.black
+        )
+      }
+  }
+
   def toWindow(state: AppState, pointerPos: Option[PointerInput.Position]): Window = state match {
     case inGame: InGame =>
       Window.empty
@@ -103,19 +135,11 @@ object AppStateRenderer extends ChainingSyntax {
       toWindow(gameOver.finalState, pointerPos)
     case historyView: HistoryView =>
       Window.empty
-        .pipe(putGameMessages(historyView.currentState, Constants.screenHeight, historyView.scroll))
+        .pipe(putGameMessages(historyView.currentState, Constants.screenHeight - 2, historyView.scroll))
         .pipe(putPlayerStatus(historyView.currentState))
     case inventoryView: InventoryView =>
-      inventoryView.currentState.player.inventory.items.zipWithIndex
-        .foldLeft(Window.empty) { case (window, (item, idx)) =>
-          window.printLine(
-            Constants.hpBarSize + 1,
-            idx + 1,
-            item.name,
-            Constants.Pallete.white,
-            if (inventoryView.cursor == idx) Constants.Pallete.darkGray else Constants.Pallete.black
-          )
-        }
+      Window.empty
+        .pipe(printInventory(inventoryView))
         .pipe(putPlayerStatus(inventoryView.currentState))
     case _ => Window.empty
   }

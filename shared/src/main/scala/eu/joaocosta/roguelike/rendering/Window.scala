@@ -13,6 +13,35 @@ case class Window(tiles: Map[(Int, Int), Window.Sprite]) {
   def printLine(x: Int, y: Int, string: String, fg: Color = Color(255, 255, 255), bg: Color = Color(0, 0, 0)): Window =
     addTiles(string.zipWithIndex.map { case (char, dx) => (x + dx, y) -> Window.Sprite(char, fg, bg) })
 
+  def addBorders(
+      x1: Int,
+      y1: Int,
+      x2: Int,
+      y2: Int,
+      fg: Color = Color(255, 255, 255),
+      bg: Color = Color(0, 0, 0),
+      ul: Char = 174,
+      ur: Char = 175,
+      bl: Char = 190,
+      br: Char = 191,
+      hLine: Char = 136,
+      vLine: Char = 137
+  ): Window = {
+    val newTiles = for {
+      y <- y1 to y2
+      x <- x1 to x2
+      tile =
+        if (y == y1 && x == x1) ul
+        else if (y == y1 && x == x2) ur
+        else if (y == y2 && x == x1) bl
+        else if (y == y2 && x == x2) br
+        else if (y == y1 || y == y2) hLine
+        else if (x == x1 || x == x2) vLine
+        else ' '
+    } yield (x, y) -> Window.Sprite(tile, fg, bg)
+    addTiles(newTiles)
+  }
+
   def invertColors(x: Int, y: Int): Window = tiles.get((x, y)) match {
     case None         => this
     case Some(sprite) => addTiles(List((x, y) -> sprite.copy(fg = sprite.bg, bg = sprite.fg)))
