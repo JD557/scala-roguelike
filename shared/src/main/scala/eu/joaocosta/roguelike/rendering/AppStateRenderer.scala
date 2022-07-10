@@ -105,6 +105,18 @@ object AppStateRenderer extends ChainingSyntax {
       Window.empty
         .pipe(putGameMessages(historyView.currentState, Constants.screenHeight, historyView.scroll))
         .pipe(putPlayerStatus(historyView.currentState))
+    case inventoryView: InventoryView =>
+      inventoryView.currentState.player.inventory.items.zipWithIndex
+        .foldLeft(Window.empty) { case (window, (item, idx)) =>
+          window.printLine(
+            Constants.hpBarSize + 1,
+            idx + 1,
+            item.name,
+            Constants.Pallete.white,
+            if (inventoryView.cursor == idx) Constants.Pallete.darkGray else Constants.Pallete.black
+          )
+        }
+        .pipe(putPlayerStatus(inventoryView.currentState))
     case _ => Window.empty
   }
 }

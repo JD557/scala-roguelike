@@ -59,10 +59,14 @@ object Entity {
   }
   sealed trait Item extends Entity with Consumable.Component {
     val isWalkable = true
+
+    def setPosition(x: Int, y: Int): Item
   }
   case class HealingPotion(x: Int, y: Int) extends Item {
     val name   = "Healing potion"
     val sprite = Window.Sprite('!', Constants.Pallete.lightBlue)
+    def setPosition(x: Int, y: Int): HealingPotion =
+      copy(x = x, y = y)
     def consumeResult(target: Entity) = target match {
       case entity: FighterEntity => List(Action.Heal(entity, 4))
       case _                     => List(Action.NothingHappened)

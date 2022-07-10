@@ -44,9 +44,10 @@ object AppState {
       copy(messages = (message :: messages))
 
     def applyAction(action: Action): AppState = action match {
-      case Action.QuitGame            => Leaving
-      case Action.SwitchHistoryViewer => HistoryView(this, 0)
-      case Action.Wait                => this
+      case Action.QuitGame              => Leaving
+      case Action.SwitchHistoryViewer   => HistoryView(this, 0)
+      case Action.SwitchInventoryViewer => InventoryView(this, 0)
+      case Action.Wait                  => this
       case Action.NothingHappened =>
         printLine(Constants.Message.NothingHappened)
       case Action.Stare(source, destination) =>
@@ -58,6 +59,8 @@ object AppState {
           applyAction(Action.Movement(player, dx, dy)).applyAction(Action.NpcTurn)
         else
           this
+      case Action.PlayerAction(getActions) =>
+        applyActions(getActions(player)).applyAction(Action.NpcTurn)
       case Action.Movement(player: Entity.Player, dx, dy) =>
         val nextX = player.x + dx
         val nextY = player.y + dy
@@ -115,7 +118,19 @@ object AppState {
         else
           printLine(Constants.Message.Healed(target, effectiveAmount)).updateEntity(target, newTarget)
       case Action.UseItem(source, target, item) =>
-        printLine(Constants.Message.UsedItem(source, target, item)).applyActions(item.consumeResult(target))
+        val updatedEntity = source.removeItem(item)
+        if (source.inventory != updatedEntity.inventory)
+          printLine(Constants.Message.UsedItem(source, target, item))
+            .updateEntity(source, updatedEntity)
+            .applyActions(item.consumeResult(if (source == target) updatedEntity else target))
+        else this
+      case Action.DropItem(source, item) =>
+        val updatedEntity = source.removeItem(item)
+        if (source.inventory != updatedEntity.inventory)
+          printLine(Constants.Message.DroppedItem(source, item))
+            .updateEntity(source, updatedEntity)
+            .copy(currentLevel = currentLevel.addEntity(item.setPosition(source.x, source.y)))
+        else this
 
       case Action.NpcTurn =>
         currentLevel.npcs.foldLeft(this: AppState) { case (st, npc) =>
@@ -129,10 +144,24 @@ object AppState {
     def applyAction(action: Action): AppState = action match {
       case Action.QuitGame            => Leaving
       case Action.SwitchHistoryViewer => currentState
-      case Action.ScrollLog(dy) =>
-        val nextScroll = scroll + dy
+      case Action.MoveCursor(dy) =>
+        val nextScroll = scroll - dy
         if (nextScroll < 0 || nextScroll >= currentState.messages.size) this
         else copy(scroll = nextScroll)
+      case _ => this
+    }
+  }
+
+  case class InventoryView(currentState: InGame, cursor: Int) extends AppState {
+    def applyAction(action: Action): AppState = action match {
+      case Action.QuitGame              => Leaving
+      case Action.SwitchInventoryViewer => currentState
+      case Action.MoveCursor(dy) =>
+        val nextCursor = cursor + dy
+        if (nextCursor < 0 || nextCursor >= currentState.player.inventory.items.size) this
+        else copy(cursor = nextCursor)
+      case playerAction: Action.PlayerAction =>
+        currentState.applyAction(playerAction)
       case _ => this
     }
   }

@@ -21,6 +21,8 @@ case class Level(
     if (right.isEmpty) this
     else copy(entities = left ++ to.toList ++ right.tail)
   }
+  def addEntity(entity: Entity) =
+    copy(entities = entity :: entities)
 
   def pathfind(x1: Int, y1: Int, x2: Int, y2: Int): List[(Int, Int)] = {
     @tailrec

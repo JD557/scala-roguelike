@@ -5,4 +5,5 @@ package object entity {
   type ConsumableEntity = Entity with Consumable.Component
   type FighterEntity    = Entity with Fighter.Component[_]
   type MoveableEntity   = Entity with Moveable.Component[_]
+  type InventoryEntity  = Entity with Inventory.Component[_]
 }

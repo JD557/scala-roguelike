@@ -71,6 +71,11 @@ object Constants {
           else s"${source.name} used a ${item.name} on ${target.name}",
           Constants.Pallete.gray
         )
+    case DroppedItem(source: Entity, item: Entity)
+        extends Message(
+          s"${source.name} dropped a ${item.name}",
+          Constants.Pallete.gray
+        )
     case NothingHappened extends Message("Nothing happened...", Constants.Pallete.gray)
   }
   object Message {
