@@ -12,10 +12,10 @@ object Main extends MinartApp {
   type State = AppState
   val loopRunner = LoopRunner()
   val canvasSettings = Canvas.Settings(
-    width = Constants.screenWidth * Constants.spriteWidth,
-    height = Constants.screenHeight * Constants.spriteHeight,
+    width = constants.screenWidth * constants.spriteWidth,
+    height = constants.screenHeight * constants.spriteHeight,
     scale = 2,
-    clearColor = Constants.Pallete.black
+    clearColor = constants.Pallete.black
   )
   val canvasManager = CanvasManager()
   val initialState  = AppState.initialState

@@ -1,6 +1,7 @@
-package eu.joaocosta.roguelike.entity
+package eu.joaocosta.roguelike.entity.components
 
 import eu.joaocosta.roguelike.Action
+import eu.joaocosta.roguelike.entity.Entity
 
 object Consumable {
   trait Component {

@@ -8,8 +8,9 @@ import eu.joaocosta.minart.graphics.image._
 import eu.joaocosta.minart.graphics.pure._
 import eu.joaocosta.minart.input._
 import eu.joaocosta.roguelike.AppState._
+import eu.joaocosta.roguelike.constants.Pallete
 import eu.joaocosta.roguelike.entity._
-import eu.joaocosta.roguelike.{AppState, Constants, GameMap}
+import eu.joaocosta.roguelike.{AppState, GameMap, constants}
 
 object AppStateRenderer extends ChainingSyntax {
 
@@ -23,15 +24,15 @@ object AppStateRenderer extends ChainingSyntax {
         y1,
         x2,
         y2,
-        fg = Constants.Pallete.white,
-        bg = Constants.Pallete.black
+        fg = Pallete.white,
+        bg = Pallete.black
       )
       .printLine(
         x1 + 1,
         y1,
         title,
-        fg = Constants.Pallete.black,
-        bg = Constants.Pallete.white
+        fg = Pallete.black,
+        bg = Pallete.white
       )
       .putWindow(x1 + 1, y1 + 1, subWindow)
   }
@@ -71,7 +72,7 @@ object AppStateRenderer extends ChainingSyntax {
   }
 
   private def putGameMessages(state: InGame, limit: Int, scroll: Int)(window: Window): Window = {
-    val charLimit = Constants.popUpW - 1
+    val charLimit = constants.popUpW - 1
     val wrappedMessages = state.messages.flatMap { case msg =>
       wrapText(msg.text, charLimit).map(txt => txt -> msg.color).reverse
     }
@@ -83,49 +84,49 @@ object AppStateRenderer extends ChainingSyntax {
         win.printLine(0, limit - 1 - y, text, color)
       }
     addPopup(
-      Constants.popUpX,
-      Constants.screenHeight - 2 - limit,
-      Constants.popUpX + Constants.popUpW,
-      Constants.screenHeight - 1,
+      constants.popUpX,
+      constants.screenHeight - 2 - limit,
+      constants.popUpX + constants.popUpW,
+      constants.screenHeight - 1,
       "Message Log",
       subwindow
     )(window)
   }
 
   private def putPlayerStatus(state: InGame)(window: Window): Window = {
-    val filledTiles = (Constants.hpBarSize * state.player.fighter.hp) / state.player.fighter.maxHp
-    val freeTiles   = Constants.hpBarSize - filledTiles
+    val filledTiles = (constants.hpBarSize * state.player.fighter.hp) / state.player.fighter.maxHp
+    val freeTiles   = constants.hpBarSize - filledTiles
     val barText = s" HP: ${state.player.fighter.hp}/${state.player.fighter.maxHp}"
-      .padTo(Constants.hpBarSize, ' ')
-      .take(Constants.hpBarSize)
+      .padTo(constants.hpBarSize, ' ')
+      .take(constants.hpBarSize)
     window
       .printLine(
         0,
-        Constants.screenHeight - Constants.maxMessages,
+        constants.screenHeight - constants.maxMessages,
         barText.take(filledTiles),
-        Constants.Pallete.white,
-        Constants.Pallete.green
+        Pallete.white,
+        Pallete.green
       )
       .printLine(
         filledTiles,
-        Constants.screenHeight - Constants.maxMessages,
+        constants.screenHeight - constants.maxMessages,
         barText.drop(filledTiles),
-        Constants.Pallete.white,
-        Constants.Pallete.red
+        Pallete.white,
+        Pallete.red
       )
       .printLine(
         1,
-        Constants.screenHeight - Constants.maxMessages + 1,
+        constants.screenHeight - constants.maxMessages + 1,
         s"ATK: ${state.player.fighter.attack}"
       )
       .printLine(
         11,
-        Constants.screenHeight - Constants.maxMessages + 1,
+        constants.screenHeight - constants.maxMessages + 1,
         s"DEF: ${state.player.fighter.defense}"
       )
       .printLine(
         1,
-        Constants.screenHeight - Constants.maxMessages + 2,
+        constants.screenHeight - constants.maxMessages + 2,
         s"CAP: ${state.player.inventory.items.size}/${state.player.inventory.capacity}"
       )
   }
@@ -133,11 +134,11 @@ object AppStateRenderer extends ChainingSyntax {
   private def printSelectedEntities(state: InGame, pointerPos: Option[PointerInput.Position])(
       window: Window
   ): Window = {
-    val selectedTile     = pointerPos.map(pos => (pos.x / Constants.spriteWidth, pos.y / Constants.spriteHeight))
+    val selectedTile     = pointerPos.map(pos => (pos.x / constants.spriteWidth, pos.y / constants.spriteHeight))
     val selectedEntities = state.entities.filter(e => selectedTile.exists { case (px, py) => px == e.x && py == e.y })
     selectedTile
       .fold(window) { case (px, py) => window.invertColors(px, py) }
-      .printLine(1, Constants.screenHeight - 1, selectedEntities.map(_.name).mkString(", "))
+      .printLine(1, constants.screenHeight - 1, selectedEntities.map(_.name).mkString(", "))
   }
 
   private def printInventory(state: InventoryView)(
@@ -149,15 +150,15 @@ object AppStateRenderer extends ChainingSyntax {
           0,
           idx + 1,
           item.name,
-          Constants.Pallete.white,
-          if (state.cursor == idx) Constants.Pallete.darkGray else Constants.Pallete.black
+          Pallete.white,
+          if (state.cursor == idx) Pallete.darkGray else Pallete.black
         )
       }
     addPopup(
-      Constants.popUpX,
+      constants.popUpX,
       0,
-      Constants.popUpX + Constants.popUpW,
-      Constants.screenHeight - 1,
+      constants.popUpX + constants.popUpW,
+      constants.screenHeight - 1,
       "Inventory",
       subwindow
     )(window)
@@ -168,14 +169,14 @@ object AppStateRenderer extends ChainingSyntax {
       Window.empty
         .pipe(putGameTiles(inGame))
         .pipe(printSelectedEntities(inGame, pointerPos))
-        .pipe(putGameMessages(inGame, Constants.maxMessages, 0))
+        .pipe(putGameMessages(inGame, constants.maxMessages, 0))
         .pipe(putPlayerStatus(inGame))
     case gameOver: GameOver =>
       toWindow(gameOver.finalState, pointerPos)
     case historyView: HistoryView =>
       Window.empty
         .pipe(putGameTiles(historyView.currentState))
-        .pipe(putGameMessages(historyView.currentState, Constants.screenHeight - 2, historyView.scroll))
+        .pipe(putGameMessages(historyView.currentState, constants.screenHeight - 2, historyView.scroll))
         .pipe(putPlayerStatus(historyView.currentState))
     case inventoryView: InventoryView =>
       Window.empty

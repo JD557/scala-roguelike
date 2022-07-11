@@ -5,6 +5,7 @@ import scala.util.Random
 
 import eu.joaocosta.roguelike._
 import eu.joaocosta.roguelike.entity.Entity
+import eu.joaocosta.roguelike.entity.entities._
 
 case class DefaultLevelGenerator(
     width: Int,
@@ -16,16 +17,16 @@ case class DefaultLevelGenerator(
     maxItems: Int
 ) extends LevelGenerator {
 
-  def generateEnemies(room: Room, random: Random): List[Entity.Npc] =
+  def generateEnemies(room: Room, random: Random): List[Npc] =
     LevelGenerator.randomEntityPositions(room, maxMonsters, random).map { case (x, y) =>
-      if (random.nextDouble() < 0.2) Entity.Troll(x, y)
-      else Entity.Orc(x, y)
+      if (random.nextDouble() < 0.2) Npc.Troll(x, y)
+      else Npc.Orc(x, y)
     }
 
-  def generateItems(room: Room, random: Random): List[Entity.Item] =
+  def generateItems(room: Room, random: Random): List[Item] =
     LevelGenerator.randomEntityPositions(room, maxItems, random).map { case (x, y) =>
-      if (random.nextDouble() < 0.3) Entity.LightningScroll(x, y)
-      else Entity.HealingPotion(x, y)
+      if (random.nextDouble() < 0.3) Item.LightningScroll(x, y)
+      else Item.HealingPotion(x, y)
     }
 
   def generateLevel(random: Random): Level = {
@@ -68,7 +69,7 @@ case class DefaultLevelGenerator(
       ((0 until width).flatMap(x => (0 until height).map(y => (x, y) -> GameMap.Tile.Wall)).iterator ++
         (rooms.iterator ++ tunnels.iterator).flatMap(_.tiles).map(pos => pos -> GameMap.Tile.Floor)).toMap
     Level(
-      playerStart = Entity.Player(rooms.head.center._1, rooms.head.center._2),
+      playerStart = Player(rooms.head.center._1, rooms.head.center._2),
       gameMap = GameMap(map),
       entities = rooms.tail.flatMap(room => generateEnemies(room, random) ++ generateItems(room, random))
     )

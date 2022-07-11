@@ -3,7 +3,7 @@ package eu.joaocosta.roguelike.rendering
 import eu.joaocosta.minart.graphics._
 import eu.joaocosta.minart.graphics.image._
 import eu.joaocosta.minart.graphics.pure._
-import eu.joaocosta.roguelike.Constants
+import eu.joaocosta.roguelike.constants
 
 case class Window(tiles: Map[(Int, Int), Window.Sprite]) {
 
@@ -57,7 +57,7 @@ case class Window(tiles: Map[(Int, Int), Window.Sprite]) {
         case Color(0, 0, 0)       => bg
         case c                    => c
       }
-      CanvasIO.blit(sprite)(x * Constants.spriteWidth, y * Constants.spriteHeight)
+      CanvasIO.blit(sprite)(x * constants.spriteWidth, y * constants.spriteHeight)
     }
   }
 }

@@ -1,4 +1,6 @@
-package eu.joaocosta.roguelike.entity
+package eu.joaocosta.roguelike.entity.components
+
+import eu.joaocosta.roguelike.entity.Entity
 
 case class Fighter(hp: Int, maxHp: Int, attack: Int, defense: Int, attackVerb: String) {
   val isDead: Boolean = hp <= 0

@@ -3,15 +3,16 @@ package eu.joaocosta.roguelike
 import scala.annotation.tailrec
 
 import eu.joaocosta.roguelike.entity.Entity
+import eu.joaocosta.roguelike.entity.entities._
 
 case class Level(
-    playerStart: Entity.Player,
+    playerStart: Player,
     gameMap: GameMap,
     entities: List[Entity]
 ) {
 
-  lazy val npcs: List[Entity.Npc]   = entities.collect { case npc: Entity.Npc => npc }
-  lazy val items: List[Entity.Item] = entities.collect { case item: Entity.Item => item }
+  lazy val npcs: List[Npc]   = entities.collect { case npc: Npc => npc }
+  lazy val items: List[Item] = entities.collect { case item: Item => item }
 
   def isWalkable(x: Int, y: Int) =
     gameMap.tiles.get((x, y)).forall(_.walkable) && !entities.exists(e => !e.isWalkable && x == e.x && y == e.y)

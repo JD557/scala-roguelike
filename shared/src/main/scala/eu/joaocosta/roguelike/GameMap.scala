@@ -2,6 +2,7 @@ package eu.joaocosta.roguelike
 
 import scala.annotation.tailrec
 
+import eu.joaocosta.roguelike.constants.Pallete
 import eu.joaocosta.roguelike.rendering.Window
 
 case class GameMap(tiles: Map[(Int, Int), GameMap.Tile]) {
@@ -48,14 +49,14 @@ object GameMap {
     case Wall
         extends Tile(
           walkable = false,
-          sprite = Window.Sprite('#', Constants.Pallete.red, Constants.Pallete.orange),
-          darkSprite = Window.Sprite('#', Constants.Pallete.darkGray, Constants.Pallete.gray)
+          sprite = Window.Sprite('#', Pallete.red, Pallete.orange),
+          darkSprite = Window.Sprite('#', Pallete.darkGray, Pallete.gray)
         )
     case Floor
         extends Tile(
           walkable = true,
-          sprite = Window.Sprite(' ', Constants.Pallete.orange, Constants.Pallete.orange),
-          darkSprite = Window.Sprite(' ', Constants.Pallete.gray, Constants.Pallete.gray)
+          sprite = Window.Sprite(' ', Pallete.orange, Pallete.orange),
+          darkSprite = Window.Sprite(' ', Pallete.gray, Pallete.gray)
         )
   }
 }

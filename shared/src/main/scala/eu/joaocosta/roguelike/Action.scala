@@ -2,6 +2,7 @@ package eu.joaocosta.roguelike
 
 import eu.joaocosta.minart.input._
 import eu.joaocosta.roguelike.entity._
+import eu.joaocosta.roguelike.entity.entities._
 
 enum Action {
   case QuitGame
@@ -10,14 +11,14 @@ enum Action {
   case Wait
   case NothingHappened
   case Stare(source: Entity, destination: Entity)
-  case PlayerAction(f: Entity.Player => List[Action])
+  case PlayerAction(f: Player => List[Action])
   case PickUp
   case Movement(target: MoveableEntity, dx: Int, dy: Int)
   case Attack(source: FighterEntity, target: FighterEntity)
   case Damage(target: FighterEntity, amount: Int)
   case Heal(target: FighterEntity, amount: Int)
-  case UseItem(source: InventoryEntity, item: Entity.Item)
-  case DropItem(source: InventoryEntity, item: Entity.Item)
+  case UseItem(source: InventoryEntity, item: Item)
+  case DropItem(source: InventoryEntity, item: Item)
   case NpcTurn
   case MoveCursor(dy: Int)
 }
