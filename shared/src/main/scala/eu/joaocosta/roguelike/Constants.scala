@@ -47,15 +47,22 @@ object Constants {
 
   enum Message(val text: String, val color: Color) {
     case Welcome extends Message("Welcome to the Dungeon!", Constants.Pallete.blue)
-    case Killed(source: Entity, target: Entity)
+    case Died(target: Entity)
         extends Message(
-          s"The ${source.name} killed the ${target.name}",
+          s"${target.name} died",
           Message.ifPlayer(target, Constants.Pallete.red, Constants.Pallete.orange)
         )
-    case Damaged(source: Entity, target: Entity, damage: Int)
+    case Attacked(source: Entity, target: Entity, verb: String)
         extends Message(
-          s"The ${source.name} kicked the ${target.name} for ${damage} damage",
+          s"The ${source.name} ${verb} the ${target.name}",
           Message.ifPlayer(target, Constants.Pallete.lightRed, Constants.Pallete.white)
+        )
+    case Damaged(target: Entity, damage: Int)
+        extends Message(
+          if (damage <= 0) s"It had no effect"
+          else s"${target.name} took ${damage} damage",
+          if (damage <= 0) Constants.Pallete.gray
+          else Message.ifPlayer(target, Constants.Pallete.lightRed, Constants.Pallete.white)
         )
     case Healed(target: Entity, effectiveAmount: Int)
         extends Message(
@@ -68,9 +75,9 @@ object Constants {
         extends Message(s"${source.name} can't carry anything else", Constants.Pallete.orange)
     case PickedUp(source: Entity, target: Entity)
         extends Message(s"${source.name} picked up ${target.name}", Constants.Pallete.white)
-    case UsedItem(source: Entity, target: Entity, item: Entity)
+    case UsedItem(source: Entity, target: Entity, item: Entity.Item)
         extends Message(
-          if (source == target) s"${source.name} used a ${item.name}"
+          if (source == target) s"${target.name} ${item.consumeVerb} a ${item.name}"
           else s"${source.name} used a ${item.name} on ${target.name}",
           Constants.Pallete.gray
         )

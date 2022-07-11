@@ -87,19 +87,24 @@ object AppState {
             applyAction(Action.NothingHappened)
         }
       case Action.Attack(source, target) =>
-        val damage    = source.fighter.computeDamage(target.fighter)
+        val damage = source.fighter.computeDamage(target.fighter)
+        printLine(Constants.Message.Attacked(source, target, source.fighter.attackVerb))
+          .applyAction(Action.Damage(target, damage))
+      case Action.Damage(target, damage) =>
         val newTarget = target.applyDamage(damage)
-        val message =
-          if (target.fighter.isDead) Constants.Message.Killed(source, target)
-          else Constants.Message.Damaged(source, target, damage)
+        val afterMessages =
+          if (newTarget.fighter.isDead)
+            printLine(Constants.Message.Damaged(target, damage))
+              .printLine(Constants.Message.Died(target))
+          else printLine(Constants.Message.Damaged(target, damage))
         newTarget match {
           case newPlayer: Entity.Player =>
             if (newPlayer.fighter.isDead)
-              GameOver(finalState = printLine(message).copy(player = newPlayer))
+              GameOver(finalState = afterMessages.copy(player = newPlayer))
             else
-              printLine(message).updateEntity(player, newPlayer)
+              afterMessages.updateEntity(player, newPlayer)
           case _ =>
-            printLine(message).updateEntity(
+            afterMessages.updateEntity(
               target,
               if (!newTarget.fighter.isDead) newTarget else Entity.Corpse(newTarget)
             )
@@ -110,13 +115,18 @@ object AppState {
         if (effectiveAmount <= 0) applyAction(Action.NothingHappened)
         else
           printLine(Constants.Message.Healed(target, effectiveAmount)).updateEntity(target, newTarget)
-      case Action.UseItem(source, target, item) =>
+      case Action.UseItem(source, item) =>
         val updatedEntity = source.removeItem(item)
-        if (source.inventory != updatedEntity.inventory)
-          printLine(Constants.Message.UsedItem(source, target, item))
-            .updateEntity(source, updatedEntity)
-            .applyActions(item.consumeResult(if (source == target) updatedEntity else target))
-        else this
+        if (source.inventory == updatedEntity.inventory) this
+        else
+          item.pickTarget(source, currentLevel.npcs) match {
+            case Some(target) =>
+              printLine(Constants.Message.UsedItem(source, target, item))
+                .updateEntity(source, updatedEntity)
+                .applyActions(item.consumeResult(if (source == target) updatedEntity else target))
+            case None =>
+              applyAction(Action.NothingHappened)
+          }
       case Action.DropItem(source, item) =>
         val updatedEntity = source.removeItem(item)
         if (source.inventory != updatedEntity.inventory)

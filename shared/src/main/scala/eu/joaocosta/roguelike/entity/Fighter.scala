@@ -1,6 +1,6 @@
 package eu.joaocosta.roguelike.entity
 
-case class Fighter(hp: Int, maxHp: Int, attack: Int, defense: Int) {
+case class Fighter(hp: Int, maxHp: Int, attack: Int, defense: Int, attackVerb: String) {
   val isDead: Boolean = hp <= 0
   def computeDamage(that: Fighter): Int =
     math.min(math.max(0, this.attack - that.defense), that.hp)

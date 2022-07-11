@@ -14,8 +14,9 @@ enum Action {
   case PickUp
   case Movement(target: MoveableEntity, dx: Int, dy: Int)
   case Attack(source: FighterEntity, target: FighterEntity)
+  case Damage(target: FighterEntity, amount: Int)
   case Heal(target: FighterEntity, amount: Int)
-  case UseItem(source: InventoryEntity, target: Entity, item: Entity.Item)
+  case UseItem(source: InventoryEntity, item: Entity.Item)
   case DropItem(source: InventoryEntity, item: Entity.Item)
   case NpcTurn
   case MoveCursor(dy: Int)
@@ -57,7 +58,7 @@ object Action {
       case KeyboardInput.Key.D =>
         List(PlayerAction(p => p.inventory.items.drop(cursor).headOption.map(item => DropItem(p, item)).toList))
       case KeyboardInput.Key.U =>
-        List(PlayerAction(p => p.inventory.items.drop(cursor).headOption.map(item => UseItem(p, p, item)).toList))
+        List(PlayerAction(p => p.inventory.items.drop(cursor).headOption.map(item => UseItem(p, item)).toList))
       case _ => Nil
     }
 
