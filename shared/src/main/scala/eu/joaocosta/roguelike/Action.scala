@@ -24,12 +24,6 @@ enum Action {
 }
 
 object Action {
-  def getBaseActions(keyboard: KeyboardInput): List[Action] =
-    keyboard.keysPressed.toList.flatMap {
-      case KeyboardInput.Key.Escape => List(QuitGame)
-      case _                        => Nil
-    }
-
   def getInGameActions(keyboard: KeyboardInput): List[Action] =
     keyboard.keysPressed.toList.flatMap {
       case KeyboardInput.Key.Up    => List(PlayerAction(p => List(Movement(p, 0, -1))))
@@ -63,10 +57,10 @@ object Action {
       case _ => Nil
     }
 
-  def getActions(state: AppState, keyboard: KeyboardInput): List[Action] = getBaseActions(keyboard) ++ (state match {
+  def getActions(state: AppState, keyboard: KeyboardInput): List[Action] = state match {
     case _: AppState.InGame         => getInGameActions(keyboard)
     case _: AppState.HistoryView    => getHistoryViewActions(keyboard)
     case st: AppState.InventoryView => getInventoryViewActions(st.cursor, keyboard)
     case _                          => Nil
-  })
+  }
 }

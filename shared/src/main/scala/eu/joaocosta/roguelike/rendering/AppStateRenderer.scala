@@ -10,7 +10,7 @@ import eu.joaocosta.minart.input._
 import eu.joaocosta.roguelike.AppState._
 import eu.joaocosta.roguelike.constants.Pallete
 import eu.joaocosta.roguelike.entity._
-import eu.joaocosta.roguelike.{AppState, GameMap, constants}
+import eu.joaocosta.roguelike.{AppState, GameMap, GameState, constants}
 
 object AppStateRenderer extends ChainingSyntax {
 
@@ -37,7 +37,7 @@ object AppStateRenderer extends ChainingSyntax {
       .putWindow(x1 + 1, y1 + 1, subWindow)
   }
 
-  private def putGameTiles(state: InGame)(window: Window): Window = {
+  private def putGameTiles(state: GameState)(window: Window): Window = {
     def tileSprite(pos: (Int, Int), tile: GameMap.Tile): Option[Window.Sprite] =
       if (state.visibleTiles(pos)) Some(tile.sprite)
       else if (state.exploredTiles(pos)) Some(tile.darkSprite)
@@ -71,7 +71,7 @@ object AppStateRenderer extends ChainingSyntax {
     }
   }
 
-  private def putGameMessages(state: InGame, limit: Int, scroll: Int)(window: Window): Window = {
+  private def putGameMessages(state: GameState, limit: Int, scroll: Int)(window: Window): Window = {
     val charLimit = constants.popUpW - 1
     val wrappedMessages = state.messages.flatMap { case msg =>
       wrapText(msg.text, charLimit).map(txt => txt -> msg.color).reverse
@@ -93,7 +93,7 @@ object AppStateRenderer extends ChainingSyntax {
     )(window)
   }
 
-  private def putPlayerStatus(state: InGame)(window: Window): Window = {
+  private def putPlayerStatus(state: GameState)(window: Window): Window = {
     val filledTiles = (constants.hpBarSize * state.player.fighter.hp) / state.player.fighter.maxHp
     val freeTiles   = constants.hpBarSize - filledTiles
     val barText = s" HP: ${state.player.fighter.hp}/${state.player.fighter.maxHp}"
@@ -131,7 +131,7 @@ object AppStateRenderer extends ChainingSyntax {
       )
   }
 
-  private def printSelectedEntities(state: InGame, pointerPos: Option[PointerInput.Position])(
+  private def printSelectedEntities(state: GameState, pointerPos: Option[PointerInput.Position])(
       window: Window
   ): Window = {
     val selectedTile     = pointerPos.map(pos => (pos.x / constants.spriteWidth, pos.y / constants.spriteHeight))
@@ -164,15 +164,27 @@ object AppStateRenderer extends ChainingSyntax {
     )(window)
   }
 
+  def toWindow(state: GameState, pointerPos: Option[PointerInput.Position]): Window = {
+    Window.empty
+      .pipe(putGameTiles(state))
+      .pipe(printSelectedEntities(state, pointerPos))
+      .pipe(putGameMessages(state, constants.maxMessages, 0))
+      .pipe(putPlayerStatus(state))
+  }
+
   def toWindow(state: AppState, pointerPos: Option[PointerInput.Position]): Window = state match {
     case inGame: InGame =>
       Window.empty
-        .pipe(putGameTiles(inGame))
-        .pipe(printSelectedEntities(inGame, pointerPos))
-        .pipe(putGameMessages(inGame, constants.maxMessages, 0))
-        .pipe(putPlayerStatus(inGame))
+        .pipe(putGameTiles(inGame.gameState))
+        .pipe(printSelectedEntities(inGame.gameState, pointerPos))
+        .pipe(putGameMessages(inGame.gameState, constants.maxMessages, 0))
+        .pipe(putPlayerStatus(inGame.gameState))
     case gameOver: GameOver =>
-      toWindow(gameOver.finalState, pointerPos)
+      Window.empty
+        .pipe(putGameTiles(gameOver.finalState))
+        .pipe(printSelectedEntities(gameOver.finalState, pointerPos))
+        .pipe(putGameMessages(gameOver.finalState, constants.maxMessages, 0))
+        .pipe(putPlayerStatus(gameOver.finalState))
     case historyView: HistoryView =>
       Window.empty
         .pipe(putGameTiles(historyView.currentState))
