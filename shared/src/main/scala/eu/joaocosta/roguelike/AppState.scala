@@ -9,7 +9,7 @@ import eu.joaocosta.roguelike.entity.entities._
 
 sealed trait AppState {
   def applyAction(action: Action): AppState
-  def applyActions(actions: Seq[Action]): AppState = actions.foldLeft(this)((st, a) => st.applyAction(a))
+  def applyActions(actions: IterableOnce[Action]): AppState = actions.foldLeft(this)((st, a) => st.applyAction(a))
 }
 
 object AppState {
