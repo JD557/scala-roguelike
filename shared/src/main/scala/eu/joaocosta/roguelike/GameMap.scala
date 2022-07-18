@@ -55,8 +55,8 @@ object GameMap {
     case Floor
         extends Tile(
           walkable = true,
-          sprite = Window.Sprite(' ', Pallete.orange, Pallete.orange),
-          darkSprite = Window.Sprite(' ', Pallete.gray, Pallete.gray)
+          sprite = Window.Sprite(' ', Pallete.yellow, Pallete.orange),
+          darkSprite = Window.Sprite(' ', Pallete.white, Pallete.gray)
         )
   }
 }

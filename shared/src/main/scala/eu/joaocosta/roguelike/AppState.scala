@@ -3,7 +3,7 @@ package eu.joaocosta.roguelike
 import scala.util.Random
 
 import eu.joaocosta.roguelike.AppState._
-import eu.joaocosta.roguelike.constants.Message
+import eu.joaocosta.roguelike.constants._
 import eu.joaocosta.roguelike.entity._
 import eu.joaocosta.roguelike.entity.entities._
 
@@ -23,6 +23,7 @@ object AppState {
 
     def applyAction(action: Action): AppState = action match {
       case Action.QuitGame              => Leaving
+      case Action.SwitchLookAround      => LookAround(gameState, gameState.player.x, gameState.player.y)
       case Action.SwitchHistoryViewer   => HistoryView(gameState, 0)
       case Action.SwitchInventoryViewer => InventoryView(gameState, 0)
       case Action.Wait                  => this
@@ -132,11 +133,26 @@ object AppState {
     }
   }
 
+  case class LookAround(currentState: GameState, cursorX: Int, cursorY: Int) extends AppState {
+    def applyAction(action: Action): AppState = action match {
+      case Action.QuitGame         => Leaving
+      case Action.SwitchLookAround => InGame(currentState)
+      case Action.MoveCursor(dx, dy) =>
+        val nextCursorX = cursorX + dx
+        val nextCursorY = cursorY + dy
+        if (
+          nextCursorX < 0 || nextCursorY < 0 || nextCursorX >= constants.screenWidth || nextCursorY >= constants.screenHeight
+        ) this
+        else copy(cursorX = nextCursorX, cursorY = nextCursorY)
+      case _ => this
+    }
+  }
+
   case class HistoryView(currentState: GameState, scroll: Int) extends AppState {
     def applyAction(action: Action): AppState = action match {
       case Action.QuitGame            => Leaving
       case Action.SwitchHistoryViewer => InGame(currentState)
-      case Action.MoveCursor(dy) =>
+      case Action.MoveCursor(_, dy) =>
         val nextScroll = scroll - dy
         if (nextScroll < 0 || nextScroll >= currentState.messages.size) this
         else copy(scroll = nextScroll)
@@ -148,7 +164,7 @@ object AppState {
     def applyAction(action: Action): AppState = action match {
       case Action.QuitGame              => Leaving
       case Action.SwitchInventoryViewer => InGame(currentState)
-      case Action.MoveCursor(dy) =>
+      case Action.MoveCursor(_, dy) =>
         val nextCursor = cursor + dy
         if (nextCursor < 0 || nextCursor >= currentState.player.inventory.items.size) this
         else copy(cursor = nextCursor)

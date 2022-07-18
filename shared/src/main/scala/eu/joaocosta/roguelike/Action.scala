@@ -6,6 +6,7 @@ import eu.joaocosta.roguelike.entity.entities._
 
 enum Action {
   case QuitGame
+  case SwitchLookAround
   case SwitchHistoryViewer
   case SwitchInventoryViewer
   case Wait
@@ -20,7 +21,7 @@ enum Action {
   case UseItem(source: InventoryEntity, item: Item)
   case DropItem(source: InventoryEntity, item: Item)
   case NpcTurn
-  case MoveCursor(dy: Int)
+  case MoveCursor(dx: Int, dy: Int)
 }
 
 object Action {
@@ -31,24 +32,35 @@ object Action {
       case KeyboardInput.Key.Left  => List(PlayerAction(p => List(Movement(p, -1, 0))))
       case KeyboardInput.Key.Right => List(PlayerAction(p => List(Movement(p, 1, 0))))
       case KeyboardInput.Key.Space => List(NpcTurn)
+      case KeyboardInput.Key.L     => List(SwitchLookAround)
       case KeyboardInput.Key.V     => List(SwitchHistoryViewer)
       case KeyboardInput.Key.I     => List(SwitchInventoryViewer)
       case KeyboardInput.Key.G     => List(PickUp)
       case _                       => Nil
     }
 
+  def getLookAroundActions(keyboard: KeyboardInput): List[Action] =
+    keyboard.keysPressed.toList.flatMap {
+      case KeyboardInput.Key.Up    => List(MoveCursor(0, -1))
+      case KeyboardInput.Key.Down  => List(MoveCursor(0, 1))
+      case KeyboardInput.Key.Left  => List(MoveCursor(-1, 0))
+      case KeyboardInput.Key.Right => List(MoveCursor(1, 0))
+      case KeyboardInput.Key.L     => List(SwitchLookAround)
+      case _                       => Nil
+    }
+
   def getHistoryViewActions(keyboard: KeyboardInput): List[Action] =
     keyboard.keysPressed.toList.flatMap {
-      case KeyboardInput.Key.Up   => List(MoveCursor(-1))
-      case KeyboardInput.Key.Down => List(MoveCursor(1))
+      case KeyboardInput.Key.Up   => List(MoveCursor(0, -1))
+      case KeyboardInput.Key.Down => List(MoveCursor(0, 1))
       case KeyboardInput.Key.V    => List(SwitchHistoryViewer)
       case _                      => Nil
     }
 
   def getInventoryViewActions(cursor: Int, keyboard: KeyboardInput): List[Action] =
     keyboard.keysPressed.toList.flatMap {
-      case KeyboardInput.Key.Up   => List(MoveCursor(-1))
-      case KeyboardInput.Key.Down => List(MoveCursor(1))
+      case KeyboardInput.Key.Up   => List(MoveCursor(0, -1))
+      case KeyboardInput.Key.Down => List(MoveCursor(0, 1))
       case KeyboardInput.Key.I    => List(SwitchInventoryViewer)
       case KeyboardInput.Key.D =>
         List(PlayerAction(p => p.inventory.items.drop(cursor).headOption.map(item => DropItem(p, item)).toList))
@@ -59,6 +71,7 @@ object Action {
 
   def getActions(state: AppState, keyboard: KeyboardInput): List[Action] = state match {
     case _: AppState.InGame         => getInGameActions(keyboard)
+    case _: AppState.LookAround     => getLookAroundActions(keyboard)
     case _: AppState.HistoryView    => getHistoryViewActions(keyboard)
     case st: AppState.InventoryView => getInventoryViewActions(st.cursor, keyboard)
     case _                          => Nil

@@ -7,6 +7,9 @@ import eu.joaocosta.roguelike.constants
 
 case class Window(tiles: Map[(Int, Int), Window.Sprite]) {
 
+  def addTile(tile: ((Int, Int), Window.Sprite)): Window =
+    copy(tiles = tiles + tile)
+
   def addTiles(newTiles: Iterable[((Int, Int), Window.Sprite)]): Window =
     copy(tiles = tiles ++ newTiles)
 
