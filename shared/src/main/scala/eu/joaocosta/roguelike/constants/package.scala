@@ -1,6 +1,8 @@
 package eu.joaocosta.roguelike
 
 package object constants {
+  val title = "The Minartaur's Lair"
+
   val screenWidth  = 80
   val screenHeight = 50
 

@@ -14,7 +14,40 @@ sealed trait AppState {
 
 object AppState {
   private val rng            = scala.util.Random(0) // not really purely functional, but should make games reproducible
-  val initialState: AppState = InGame(GameState.initialState(rng))
+  val initialState: AppState = Menu(0)
+
+  case class Menu(cursor: Int) extends AppState {
+    def applyAction(action: Action): AppState = action match {
+      case Action.MoveCursor(_, dy) =>
+        copy(cursor = math.min(math.max(0, cursor + dy), 2))
+      case Action.Select =>
+        cursor match {
+          case 0 => InGame(GameState.initialState(AppState.rng)) // New game
+          case 1 => this                                         // TODO Load game
+          case 2 => Leaving                                      // Quit Game
+          case _ => this
+        }
+      case _ => this
+    }
+  }
+
+  case class Pause(gameState: GameState, cursor: Int) extends AppState {
+    def applyAction(action: Action): AppState = action match {
+      case Action.MoveCursor(_, dy) =>
+        copy(cursor = math.min(math.max(0, cursor + dy), 3))
+      case Action.ReturnToGame =>
+        InGame(gameState)
+      case Action.Select =>
+        cursor match {
+          case 0 => applyAction(Action.ReturnToGame) // Continue
+          case 1 => this                             // TODO Save game
+          case 2 => Menu(0)                          // Back to Menu
+          case 3 => Leaving                          // Quit Game
+          case _ => this
+        }
+      case _ => this
+    }
+  }
 
   case class InGame(gameState: GameState) extends AppState {
 
@@ -22,7 +55,7 @@ object AppState {
       copy(gameState = f(gameState))
 
     def applyAction(action: Action): AppState = action match {
-      case Action.QuitGame => Leaving
+      case Action.PauseGame => Pause(gameState, 0)
       case Action.LookAround(triggerAction, radius) =>
         LookAround(gameState, gameState.player.x, gameState.player.y, triggerAction, radius)
       case Action.ViewHistory   => HistoryView(gameState, 0)
@@ -161,7 +194,6 @@ object AppState {
           cursorY - radius <= e.y && cursorY + radius >= e.y
       )
     def applyAction(action: Action): AppState = action match {
-      case Action.QuitGame     => Leaving
       case Action.ReturnToGame => InGame(currentState)
       case Action.MoveCursor(dx, dy) =>
         val nextCursorX = cursorX + dx
@@ -178,7 +210,6 @@ object AppState {
 
   case class HistoryView(currentState: GameState, scroll: Int) extends AppState {
     def applyAction(action: Action): AppState = action match {
-      case Action.QuitGame     => Leaving
       case Action.ReturnToGame => InGame(currentState)
       case Action.MoveCursor(_, dy) =>
         val nextScroll = scroll - dy
@@ -190,7 +221,6 @@ object AppState {
 
   case class InventoryView(currentState: GameState, cursor: Int) extends AppState {
     def applyAction(action: Action): AppState = action match {
-      case Action.QuitGame     => Leaving
       case Action.ReturnToGame => InGame(currentState)
       case Action.MoveCursor(_, dy) =>
         val nextCursor = cursor + dy
@@ -204,8 +234,8 @@ object AppState {
 
   case class GameOver(finalState: GameState) extends AppState {
     def applyAction(action: Action): AppState = action match {
-      case Action.QuitGame => Leaving
-      case _               => this
+      case Action.Select | Action.ReturnToGame => Menu(0)
+      case _                                   => this
     }
   }
 

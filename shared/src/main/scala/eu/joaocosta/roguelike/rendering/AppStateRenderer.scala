@@ -159,7 +159,7 @@ object AppStateRenderer extends ChainingSyntax {
           idx + 1,
           item.name,
           Pallete.white,
-          if (state.cursor == idx) Pallete.darkGray else Pallete.black
+          if (state.cursor == idx) Pallete.gray else Pallete.black
         )
       }
     addPopup(
@@ -173,6 +173,37 @@ object AppStateRenderer extends ChainingSyntax {
   }
 
   def toWindow(state: AppState, pointerPos: Option[PointerInput.Position]): Window = state match {
+    case Menu(cursor) =>
+      val subwindow = Window.empty
+        .printLine(0, 0, "New Game", Pallete.white, if (cursor == 0) Pallete.gray else Pallete.black)
+        .printLine(0, 1, "Load Game", Pallete.white, if (cursor == 1) Pallete.gray else Pallete.black)
+        .printLine(0, 2, "Quit Game", Pallete.white, if (cursor == 2) Pallete.gray else Pallete.black)
+
+      val titleX = (constants.screenWidth - constants.title.size) / 2
+      val titleY = constants.screenHeight / 2 - 4
+      Window.empty
+        .printLine(titleX, titleY, constants.title, Pallete.red)
+        .pipe(
+          addPopup(titleX, titleY + 1, titleX + constants.title.size - 1, titleY + 5, "", subwindow)
+        )
+    case Pause(gameState, cursor) =>
+      val subwindow = Window.empty
+        .printLine(0, 0, "Continue", Pallete.white, if (cursor == 0) Pallete.gray else Pallete.black)
+        .printLine(0, 1, "Save Game", Pallete.white, if (cursor == 1) Pallete.gray else Pallete.black)
+        .printLine(0, 2, "Back to Menu", Pallete.white, if (cursor == 2) Pallete.gray else Pallete.black)
+        .printLine(0, 3, "Quit", Pallete.white, if (cursor == 3) Pallete.gray else Pallete.black)
+      Window.empty
+        .pipe(putGameTiles(gameState))
+        .pipe(
+          addPopup(
+            constants.popUpX,
+            constants.screenHeight - 6,
+            constants.popUpX + constants.popUpW,
+            constants.screenHeight - 1,
+            "Pause",
+            subwindow
+          )
+        )
     case inGame: InGame =>
       val cursorPos = pointerPos.map(pos => (pos.x / constants.spriteWidth, pos.y / constants.spriteHeight, 0))
       Window.empty

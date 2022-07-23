@@ -37,16 +37,20 @@ object Room {
 
   case class TunnelA(x1: Int, y1: Int, x2: Int, y2: Int) extends Room {
     lazy val tiles: Set[(Int, Int)] = {
-      val horizontalLine = (x1 to x2 by math.signum(x2 - x1)).iterator.map(x => (x, y1))
-      val verticalLine   = (y1 to y2 by math.signum(y2 - y1)).iterator.map(y => (x2, y))
+      val hSign          = math.signum(x2 - x1)
+      val vSign          = math.signum(y2 - y1)
+      val horizontalLine = if (hSign == 0) Iterator.empty else (x1 to x2 by hSign).iterator.map(x => (x, y1))
+      val verticalLine   = if (vSign == 0) Iterator.empty else (y1 to y2 by vSign).iterator.map(y => (x2, y))
       (horizontalLine ++ verticalLine).toSet
     }
   }
 
   case class TunnelB(x1: Int, y1: Int, x2: Int, y2: Int) extends Room {
     lazy val tiles: Set[(Int, Int)] = {
-      val verticalLine   = (y1 to y2 by math.signum(y2 - y1)).iterator.map(y => (x1, y))
-      val horizontalLine = (x1 to x2 by math.signum(x2 - x1)).iterator.map(x => (x, y2))
+      val hSign          = math.signum(x2 - x1)
+      val vSign          = math.signum(y2 - y1)
+      val verticalLine   = if (vSign == 0) Iterator.empty else (y1 to y2 by vSign).iterator.map(y => (x1, y))
+      val horizontalLine = if (hSign == 0) Iterator.empty else (x1 to x2 by hSign).iterator.map(x => (x, y2))
       (verticalLine ++ horizontalLine).toSet
     }
   }

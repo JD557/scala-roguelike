@@ -6,7 +6,7 @@ import eu.joaocosta.roguelike.entity.components.Behavior
 import eu.joaocosta.roguelike.entity.entities._
 
 enum Action {
-  case QuitGame
+  case PauseGame
   case ReturnToGame
   case LookAround(action: List[Entity] => Action, radius: Int = 0)
   case ViewHistory
@@ -41,6 +41,7 @@ object Action {
 
   val menuActions: ActionList = Map(
     KeyboardInput.Key.Escape -> ReturnToGame,
+    KeyboardInput.Key.Enter  -> Select,
     KeyboardInput.Key.Up     -> MoveCursor(0, -1),
     KeyboardInput.Key.Down   -> MoveCursor(0, 1),
     KeyboardInput.Key.Left   -> MoveCursor(-1, 0),
@@ -48,17 +49,12 @@ object Action {
   )
 
   val inGameActions: ActionList = playerMovementActions ++ Map(
-    KeyboardInput.Key.L -> LookAround(_ => ReturnToGame),
-    KeyboardInput.Key.V -> ViewHistory,
-    KeyboardInput.Key.I -> ViewInventory,
-    KeyboardInput.Key.G -> PickUp
+    KeyboardInput.Key.Escape -> PauseGame,
+    KeyboardInput.Key.L      -> LookAround(_ => ReturnToGame),
+    KeyboardInput.Key.V      -> ViewHistory,
+    KeyboardInput.Key.I      -> ViewInventory,
+    KeyboardInput.Key.G      -> PickUp
   )
-
-  val lookAroundActions: ActionList = menuActions ++ Map(
-    KeyboardInput.Key.Enter -> Select
-  )
-
-  val historyViewActions: ActionList = menuActions
 
   def inventoryViewActions(cursor: Int): ActionList = menuActions ++ Map(
     KeyboardInput.Key.Backspace -> PlayerAction(p =>
@@ -71,12 +67,15 @@ object Action {
 
   def getActions(state: AppState, keyboard: KeyboardInput): Option[Action] = {
     keyboard.keysPressed.headOption.flatMap {
-      key => // Assume a single key is pressed. It's safer than to switch key orders
+      key => // Assume a single key is pressed. It's safer than to switch key order
         state match {
+          case _: AppState.Menu           => menuActions.get(key)
+          case _: AppState.Pause          => menuActions.get(key)
           case _: AppState.InGame         => inGameActions.get(key)
-          case _: AppState.LookAround     => lookAroundActions.get(key)
-          case _: AppState.HistoryView    => historyViewActions.get(key)
+          case _: AppState.LookAround     => menuActions.get(key)
+          case _: AppState.HistoryView    => menuActions.get(key)
           case st: AppState.InventoryView => inventoryViewActions(st.cursor).get(key)
+          case _: AppState.GameOver       => menuActions.get(key)
           case _                          => None
         }
     }

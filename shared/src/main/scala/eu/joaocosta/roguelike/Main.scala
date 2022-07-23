@@ -22,17 +22,13 @@ object Main extends MinartApp {
   val frameRate     = LoopFrequency.Uncapped
   val terminateWhen = (state: AppState) => state == Leaving
   val renderFrame = (appState: AppState) =>
-    appState match {
-      case Leaving => CanvasIO.pure(appState)
-      case state: (InGame | GameOver | LookAround | HistoryView | InventoryView) =>
-        for {
-          _       <- CanvasIO.redraw
-          input   <- CanvasIO.getKeyboardInput
-          pointer <- CanvasIO.getPointerInput
-          _       <- CanvasIO.clear()
-          _       <- AppStateRenderer.render(state, Resources.richFont, pointer)
-          actions   = Action.getActions(state, input)
-          nextState = state.applyActions(actions)
-        } yield nextState
-    }
+    for {
+      _       <- CanvasIO.redraw
+      input   <- CanvasIO.getKeyboardInput
+      pointer <- CanvasIO.getPointerInput
+      _       <- CanvasIO.clear()
+      _       <- AppStateRenderer.render(appState, Resources.richFont, pointer)
+      actions   = Action.getActions(appState, input)
+      nextState = appState.applyActions(actions)
+    } yield nextState
 }
