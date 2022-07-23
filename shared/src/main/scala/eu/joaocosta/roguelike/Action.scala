@@ -7,9 +7,10 @@ import eu.joaocosta.roguelike.entity.entities._
 
 enum Action {
   case QuitGame
-  case SwitchLookAround
-  case SwitchHistoryViewer
-  case SwitchInventoryViewer
+  case ReturnToGame
+  case LookAround(action: List[Entity] => Action)
+  case ViewHistory
+  case ViewInventory
   case Wait
   case NothingHappened
   case Stare(source: Entity, destination: Entity)
@@ -23,6 +24,7 @@ enum Action {
   case DropItem(source: InventoryEntity, item: Item)
   case NpcTurn
   case MoveCursor(dx: Int, dy: Int)
+  case Select
 }
 
 object Action {
@@ -44,22 +46,23 @@ object Action {
   )
 
   val inGameActions: ActionList = playerMovementActions ++ Map(
-    KeyboardInput.Key.L -> SwitchLookAround,
-    KeyboardInput.Key.V -> SwitchHistoryViewer,
-    KeyboardInput.Key.I -> SwitchInventoryViewer,
+    KeyboardInput.Key.L -> LookAround(_ => ReturnToGame),
+    KeyboardInput.Key.V -> ViewHistory,
+    KeyboardInput.Key.I -> ViewInventory,
     KeyboardInput.Key.G -> PickUp
   )
 
   val lookAroundActions: ActionList = cursorMovementActions ++ Map(
-    KeyboardInput.Key.L -> SwitchLookAround
+    KeyboardInput.Key.L     -> ReturnToGame,
+    KeyboardInput.Key.Enter -> Select
   )
 
   val historyViewActions: ActionList = cursorMovementActions ++ Map(
-    KeyboardInput.Key.V -> SwitchHistoryViewer
+    KeyboardInput.Key.V -> ReturnToGame
   )
 
   def inventoryViewActions(cursor: Int): ActionList = cursorMovementActions ++ Map(
-    KeyboardInput.Key.I -> SwitchInventoryViewer,
+    KeyboardInput.Key.I -> ReturnToGame,
     KeyboardInput.Key.D -> PlayerAction(p => p.inventory.items.drop(cursor).headOption.map(item => DropItem(p, item))),
     KeyboardInput.Key.U -> PlayerAction(p => p.inventory.items.drop(cursor).headOption.map(item => UseItem(p, item)))
   )

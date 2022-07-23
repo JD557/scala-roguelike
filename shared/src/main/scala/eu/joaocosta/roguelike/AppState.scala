@@ -22,11 +22,12 @@ object AppState {
       copy(gameState = f(gameState))
 
     def applyAction(action: Action): AppState = action match {
-      case Action.QuitGame              => Leaving
-      case Action.SwitchLookAround      => LookAround(gameState, gameState.player.x, gameState.player.y)
-      case Action.SwitchHistoryViewer   => HistoryView(gameState, 0)
-      case Action.SwitchInventoryViewer => InventoryView(gameState, 0)
-      case Action.Wait                  => this
+      case Action.QuitGame => Leaving
+      case Action.LookAround(triggerAction) =>
+        LookAround(gameState, gameState.player.x, gameState.player.y, triggerAction)
+      case Action.ViewHistory   => HistoryView(gameState, 0)
+      case Action.ViewInventory => InventoryView(gameState, 0)
+      case Action.Wait          => this
       case Action.NothingHappened =>
         mapState(_.printLine(Message.NothingHappened))
       case Action.Stare(source, destination) =>
@@ -142,10 +143,13 @@ object AppState {
     }
   }
 
-  case class LookAround(currentState: GameState, cursorX: Int, cursorY: Int) extends AppState {
+  case class LookAround(currentState: GameState, cursorX: Int, cursorY: Int, triggerAction: List[Entity] => Action)
+      extends AppState {
+    lazy val selectedEntities: List[Entity] =
+      currentState.entities.filter(e => cursorX == e.x && cursorY == e.y)
     def applyAction(action: Action): AppState = action match {
-      case Action.QuitGame         => Leaving
-      case Action.SwitchLookAround => InGame(currentState)
+      case Action.QuitGame     => Leaving
+      case Action.ReturnToGame => InGame(currentState)
       case Action.MoveCursor(dx, dy) =>
         val nextCursorX = cursorX + dx
         val nextCursorY = cursorY + dy
@@ -153,14 +157,16 @@ object AppState {
           nextCursorX < 0 || nextCursorY < 0 || nextCursorX >= constants.screenWidth || nextCursorY >= constants.screenHeight
         ) this
         else copy(cursorX = nextCursorX, cursorY = nextCursorY)
+      case Action.Select =>
+        InGame(currentState).applyAction(triggerAction(selectedEntities))
       case _ => this
     }
   }
 
   case class HistoryView(currentState: GameState, scroll: Int) extends AppState {
     def applyAction(action: Action): AppState = action match {
-      case Action.QuitGame            => Leaving
-      case Action.SwitchHistoryViewer => InGame(currentState)
+      case Action.QuitGame     => Leaving
+      case Action.ReturnToGame => InGame(currentState)
       case Action.MoveCursor(_, dy) =>
         val nextScroll = scroll - dy
         if (nextScroll < 0 || nextScroll >= currentState.messages.size) this
@@ -171,8 +177,8 @@ object AppState {
 
   case class InventoryView(currentState: GameState, cursor: Int) extends AppState {
     def applyAction(action: Action): AppState = action match {
-      case Action.QuitGame              => Leaving
-      case Action.SwitchInventoryViewer => InGame(currentState)
+      case Action.QuitGame     => Leaving
+      case Action.ReturnToGame => InGame(currentState)
       case Action.MoveCursor(_, dy) =>
         val nextCursor = cursor + dy
         if (nextCursor < 0 || nextCursor >= currentState.player.inventory.items.size) this
