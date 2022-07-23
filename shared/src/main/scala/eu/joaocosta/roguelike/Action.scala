@@ -2,6 +2,7 @@ package eu.joaocosta.roguelike
 
 import eu.joaocosta.minart.input._
 import eu.joaocosta.roguelike.entity._
+import eu.joaocosta.roguelike.entity.components.Behavior
 import eu.joaocosta.roguelike.entity.entities._
 
 enum Action {
