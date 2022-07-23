@@ -126,8 +126,12 @@ object AppState {
         else this
 
       case Action.NpcTurn =>
-        gameState.currentLevel.npcs.foldLeft(this: AppState) { case (st, npc) =>
-          st.applyAction(npc.ai.nextAction(npc, gameState.player, gameState.currentLevel))
+        gameState.currentLevel.npcs.foldLeft(this: AppState) {
+          case (inGame: InGame, npc) =>
+            val nextAction = npc.ai.nextAction(npc, inGame.gameState.player, inGame.gameState.currentLevel)
+            inGame.applyAction(nextAction)
+          case (st, _) =>
+            st
         }
       case _ => this
     }
