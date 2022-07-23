@@ -27,7 +27,8 @@ case class DefaultLevelGenerator(
     LevelGenerator.randomEntityPositions(room, maxItems, random).map { case (x, y) =>
       val roll = random.nextDouble()
       if (roll < 0.1) Item.LightningScroll(x, y)
-      if (roll < 0.3) Item.ConfusionScroll(x, y)
+      else if (roll < 0.2) Item.FireballScroll(x, y)
+      else if (roll < 0.3) Item.ConfusionScroll(x, y)
       else Item.HealingPotion(x, y)
     }
 

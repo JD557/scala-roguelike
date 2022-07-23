@@ -23,8 +23,8 @@ object AppState {
 
     def applyAction(action: Action): AppState = action match {
       case Action.QuitGame => Leaving
-      case Action.LookAround(triggerAction) =>
-        LookAround(gameState, gameState.player.x, gameState.player.y, triggerAction)
+      case Action.LookAround(triggerAction, radius) =>
+        LookAround(gameState, gameState.player.x, gameState.player.y, triggerAction, radius)
       case Action.ViewHistory   => HistoryView(gameState, 0)
       case Action.ViewInventory => InventoryView(gameState, 0)
       case Action.Wait          => this
@@ -78,8 +78,8 @@ object AppState {
       case Action.Attack(source, target) =>
         val damage = source.fighter.computeDamage(target.fighter)
         mapState(_.printLine(Message.Attacked(source, target, source.fighter.attackVerb)))
-          .applyAction(Action.Damage(target, damage))
-      case Action.Damage(target, damage) =>
+          .applyAction(Action.Damage(List(target), damage))
+      case Action.Damage(target :: Nil, damage) =>
         val newTarget = target.applyDamage(damage)
         if (newTarget.fighter.isDead) {
           val nextState = mapState(
@@ -97,12 +97,18 @@ object AppState {
             _.printLine(Message.Damaged(target, damage))
               .updateEntity(target, newTarget)
           )
-      case Action.Heal(target, amount) =>
+      case Action.Damage(targets, damage) =>
+        if (targets.isEmpty) applyAction(Action.NothingHappened)
+        else applyActions(targets.distinct.map(target => Action.Damage(List(target), damage)))
+      case Action.Heal(target :: Nil, amount) =>
         val newTarget       = target.heal(amount)
         val effectiveAmount = newTarget.fighter.hp - target.fighter.hp
         if (effectiveAmount <= 0) applyAction(Action.NothingHappened)
         else
           mapState(_.printLine(Message.Healed(target, effectiveAmount)).updateEntity(target, newTarget))
+      case Action.Heal(targets, amount) =>
+        if (targets.isEmpty) applyAction(Action.NothingHappened)
+        else applyActions(targets.distinct.map(target => Action.Heal(List(target), amount)))
       case Action.ChangeBehavior(target, f) =>
         mapState(_.updateEntity(target, target.updateBehavior(f)))
 
@@ -142,10 +148,18 @@ object AppState {
     }
   }
 
-  case class LookAround(currentState: GameState, cursorX: Int, cursorY: Int, triggerAction: List[Entity] => Action)
-      extends AppState {
+  case class LookAround(
+      currentState: GameState,
+      cursorX: Int,
+      cursorY: Int,
+      triggerAction: List[Entity] => Action,
+      radius: Int
+  ) extends AppState {
     lazy val selectedEntities: List[Entity] =
-      currentState.entities.filter(e => cursorX == e.x && cursorY == e.y)
+      currentState.entities.filter(e =>
+        cursorX - radius <= e.x && cursorX + radius >= e.x &&
+          cursorY - radius <= e.y && cursorY + radius >= e.y
+      )
     def applyAction(action: Action): AppState = action match {
       case Action.QuitGame     => Leaving
       case Action.ReturnToGame => InGame(currentState)

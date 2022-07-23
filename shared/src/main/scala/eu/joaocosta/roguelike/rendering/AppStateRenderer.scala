@@ -131,14 +131,20 @@ object AppStateRenderer extends ChainingSyntax {
       )
   }
 
-  private def printSelectedEntities(state: GameState, cursorPos: Option[(Int, Int)])(
+  private def printSelectedEntities(state: GameState, cursorPos: Option[(Int, Int, Int)])(
       window: Window
   ): Window = {
-    val selectedEntities = state.entities.filter(e => cursorPos.exists { case (px, py) => px == e.x && py == e.y })
-    cursorPos
-      .fold(window) { case (px, py) =>
-        if (window.tiles.contains(px, py)) window.invertColors(px, py)
-        else window.addTile((px, py) -> Window.Sprite('.', Pallete.gray, Pallete.black))
+    val selectedTiles = cursorPos.toList.flatMap { case (cx, cy, radius) =>
+      for {
+        dx <- (-radius to radius)
+        dy <- (-radius to radius)
+      } yield (cx + dx, cy + dy)
+    }.toSet
+    val selectedEntities = state.entities.filter(e => selectedTiles((e.x, e.y)))
+    selectedTiles
+      .foldLeft(window) { case (w, (px, py)) =>
+        if (w.tiles.contains(px, py)) w.invertColors(px, py)
+        else w.addTile((px, py) -> Window.Sprite('.', Pallete.gray, Pallete.black))
       }
       .printLine(1, constants.screenHeight - 1, selectedEntities.map(_.name).mkString(", "))
   }
@@ -168,14 +174,14 @@ object AppStateRenderer extends ChainingSyntax {
 
   def toWindow(state: AppState, pointerPos: Option[PointerInput.Position]): Window = state match {
     case inGame: InGame =>
-      val cursorPos = pointerPos.map(pos => (pos.x / constants.spriteWidth, pos.y / constants.spriteHeight))
+      val cursorPos = pointerPos.map(pos => (pos.x / constants.spriteWidth, pos.y / constants.spriteHeight, 0))
       Window.empty
         .pipe(putGameTiles(inGame.gameState))
         .pipe(printSelectedEntities(inGame.gameState, cursorPos))
         .pipe(putGameMessages(inGame.gameState, constants.maxMessages, 0))
         .pipe(putPlayerStatus(inGame.gameState))
     case gameOver: GameOver =>
-      val cursorPos = pointerPos.map(pos => (pos.x / constants.spriteWidth, pos.y / constants.spriteHeight))
+      val cursorPos = pointerPos.map(pos => (pos.x / constants.spriteWidth, pos.y / constants.spriteHeight, 0))
       Window.empty
         .pipe(putGameTiles(gameOver.finalState))
         .pipe(printSelectedEntities(gameOver.finalState, cursorPos))
@@ -184,7 +190,12 @@ object AppStateRenderer extends ChainingSyntax {
     case lookAround: LookAround =>
       Window.empty
         .pipe(putGameTiles(lookAround.currentState))
-        .pipe(printSelectedEntities(lookAround.currentState, Some((lookAround.cursorX, lookAround.cursorY))))
+        .pipe(
+          printSelectedEntities(
+            lookAround.currentState,
+            Some((lookAround.cursorX, lookAround.cursorY, lookAround.radius))
+          )
+        )
         .pipe(putPlayerStatus(lookAround.currentState))
     case historyView: HistoryView =>
       Window.empty
