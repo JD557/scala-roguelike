@@ -1,7 +1,6 @@
 package eu.joaocosta.roguelike.generator
 
 import scala.annotation.tailrec
-import scala.util.Random
 
 import eu.joaocosta.roguelike._
 

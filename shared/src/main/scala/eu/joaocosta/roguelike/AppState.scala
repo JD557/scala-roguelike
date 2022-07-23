@@ -13,8 +13,8 @@ sealed trait AppState {
 }
 
 object AppState {
-
-  val initialState: AppState = InGame(GameState.initialState)
+  private val rng            = scala.util.Random(0) // not really purely functional, but should make games reproducible
+  val initialState: AppState = InGame(GameState.initialState(rng))
 
   case class InGame(gameState: GameState) extends AppState {
 
@@ -128,7 +128,7 @@ object AppState {
       case Action.NpcTurn =>
         gameState.currentLevel.npcs.foldLeft(this: AppState) {
           case (inGame: InGame, npc) =>
-            val (nextAction, nextBehavior) = npc.ai.next(inGame.gameState.player, inGame.gameState.currentLevel)
+            val (nextAction, nextBehavior) = npc.ai.next(inGame.gameState.player, inGame.gameState.currentLevel, rng)
             val newNpc =
               if (nextBehavior != npc.ai) npc.updateBehavior(_ => nextBehavior)
               else npc

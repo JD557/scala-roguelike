@@ -1,7 +1,5 @@
 package eu.joaocosta.roguelike.entity.entities
 
-import scala.util.Random
-
 import eu.joaocosta.minart.graphics._
 import eu.joaocosta.roguelike.Action
 import eu.joaocosta.roguelike.constants.Pallete
@@ -56,7 +54,7 @@ object Item {
           .collectFirst { case e: BehaviorEntity =>
             Action.ChangeBehavior(
               e,
-              oldBehavior => Behavior.TemporaryBehavior(oldBehavior, Behavior.Confused(Random), turns)
+              oldBehavior => Behavior.TemporaryBehavior(oldBehavior, Behavior.Confused, turns)
             )
           }
           .getOrElse(Action.NothingHappened)

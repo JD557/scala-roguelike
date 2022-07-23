@@ -7,7 +7,7 @@ import eu.joaocosta.roguelike.entity.entities._
 import eu.joaocosta.roguelike.{Action, Level}
 
 sealed trait Behavior {
-  def next(player: Player, level: Level): (Npc => Action, Behavior)
+  def next(player: Player, level: Level, random: Random): (Npc => Action, Behavior)
 }
 
 object Behavior {
@@ -18,7 +18,7 @@ object Behavior {
 
   trait SimpleBehavior extends Behavior {
     def nextAction(player: Player, level: Level): Npc => Action
-    def next(player: Player, level: Level): (Npc => Action, Behavior) =
+    def next(player: Player, level: Level, random: Random): (Npc => Action, Behavior) =
       (nextAction(player, level), this)
   }
 
@@ -49,18 +49,18 @@ object Behavior {
     }
   }
 
-  case class Confused(random: Random) extends SimpleBehavior {
-    def nextAction(player: Player, level: Level): Npc => Action = entity => {
+  case object Confused extends Behavior {
+    def next(player: Player, level: Level, random: Random): (Npc => Action, Behavior) = ((entity: Npc) => {
       val (dx, dy) = random.shuffle(List((-1, 0), (1, 0), (0, -1), (0, 1))).head
       Action.Movement(entity, dx, dy)
-    }
+    }) -> this
   }
 
   case class TemporaryBehavior(oldBehavior: Behavior, currentBehavior: Behavior, remainingTurns: Int) extends Behavior {
-    def next(player: Player, level: Level): (Npc => Action, Behavior) =
-      if (remainingTurns <= 0) oldBehavior.next(player, level)
+    def next(player: Player, level: Level, random: Random): (Npc => Action, Behavior) =
+      if (remainingTurns <= 0) oldBehavior.next(player, level, random)
       else {
-        val (nextAction, nextBehavior) = currentBehavior.next(player, level)
+        val (nextAction, nextBehavior) = currentBehavior.next(player, level, random)
         (nextAction, copy(currentBehavior = nextBehavior, remainingTurns = remainingTurns - 1))
       }
   }
