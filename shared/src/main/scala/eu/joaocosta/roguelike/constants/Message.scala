@@ -33,10 +33,9 @@ enum Message(val text: String, val color: Color) {
   case InventoryFull(source: Entity) extends Message(s"${source.name} can't carry anything else", Pallete.orange)
   case PickedUp(source: Entity, target: Entity)
       extends Message(s"${source.name} picked up ${target.name}", Pallete.white)
-  case UsedItem(source: Entity, target: Entity, item: Item)
+  case UsedItem(source: Entity, item: Item)
       extends Message(
-        if (source == target) s"${target.name} ${item.consumeVerb} a ${item.name}"
-        else s"${source.name} used a ${item.name} on ${target.name}",
+        s"${source.name} used a ${item.name}",
         Pallete.gray
       )
   case DroppedItem(source: Entity, item: Entity)

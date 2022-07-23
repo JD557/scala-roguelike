@@ -20,6 +20,7 @@ enum Action {
   case Attack(source: FighterEntity, target: FighterEntity)
   case Damage(target: FighterEntity, amount: Int)
   case Heal(target: FighterEntity, amount: Int)
+  case ChangeBehavior(target: BehaviorEntity, f: Behavior => Behavior)
   case UseItem(source: InventoryEntity, item: Item)
   case DropItem(source: InventoryEntity, item: Item)
   case NpcTurn

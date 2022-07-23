@@ -1,5 +1,7 @@
 package eu.joaocosta.roguelike.entity.entities
 
+import scala.util.Random
+
 import eu.joaocosta.minart.graphics._
 import eu.joaocosta.roguelike.Action
 import eu.joaocosta.roguelike.constants.Pallete
@@ -11,8 +13,6 @@ sealed trait Item extends Entity with Consumable.Component {
   val isWalkable = true
 
   def setPosition(x: Int, y: Int): Item
-  def pickTarget(source: Entity, validTargets: List[Entity]): Option[Entity]
-  def consumeVerb: String
 }
 
 object Item {
@@ -21,11 +21,9 @@ object Item {
     val sprite = Window.Sprite('!', Pallete.lightBlue)
     def setPosition(x: Int, y: Int): HealingPotion =
       copy(x = x, y = y)
-    def consumeVerb                                                            = "drinked"
-    def pickTarget(source: Entity, validTargets: List[Entity]): Option[Entity] = Some(source)
-    def consumeResult(target: Entity) = target match {
-      case entity: FighterEntity => List(Action.Heal(entity, heal))
-      case _                     => List(Action.NothingHappened)
+    def consumeResult(user: Entity, entities: List[Entity]): Action = user match {
+      case entity: FighterEntity => Action.Heal(entity, heal)
+      case _                     => Action.NothingHappened
     }
   }
   case class LightningScroll(x: Int, y: Int, damage: Int = 20, maxRange: Int = 5) extends Item {
@@ -33,17 +31,35 @@ object Item {
     val sprite = Window.Sprite('~', Pallete.yellow)
     def setPosition(x: Int, y: Int): LightningScroll =
       copy(x = x, y = y)
-    def consumeVerb = "read"
-    def pickTarget(source: Entity, validTargets: List[Entity]): Option[Entity] =
-      validTargets.iterator
-        .filter(_ != source)
-        .map(e => e -> ((source.x - e.x) * (source.x - e.x) + (source.y - e.y) * (source.y - e.y)))
+    def consumeResult(user: Entity, entities: List[Entity]): Action = {
+      entities.iterator
+        .collect {
+          case (entity: FighterEntity) if entity != user =>
+            val dx = (user.x - entity.x)
+            val dy = (user.y - entity.y)
+            (entity, (dx * dx + dy * dy))
+        }
         .filter(_._2 < maxRange * maxRange)
         .minByOption(_._2)
-        .map(_._1)
-    def consumeResult(target: Entity) = target match {
-      case entity: FighterEntity => List(Action.Damage(entity, damage))
-      case _                     => List(Action.NothingHappened)
+        .map { case (entity, _) => Action.Damage(entity, damage) }
+        .getOrElse(Action.NothingHappened)
     }
+  }
+  case class ConfusionScroll(x: Int, y: Int, turns: Int = 5) extends Item {
+    val name   = "Confusion scroll"
+    val sprite = Window.Sprite('?', Pallete.yellow)
+    def setPosition(x: Int, y: Int): ConfusionScroll =
+      copy(x = x, y = y)
+    def consumeResult(user: Entity, entities: List[Entity]): Action =
+      Action.LookAround { selectedEntities =>
+        selectedEntities
+          .collectFirst { case e: BehaviorEntity =>
+            Action.ChangeBehavior(
+              e,
+              oldBehavior => Behavior.TemporaryBehavior(oldBehavior, Behavior.Confused(Random), turns)
+            )
+          }
+          .getOrElse(Action.NothingHappened)
+      }
   }
 }

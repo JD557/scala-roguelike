@@ -25,7 +25,9 @@ case class DefaultLevelGenerator(
 
   def generateItems(room: Room, random: Random): List[Item] =
     LevelGenerator.randomEntityPositions(room, maxItems, random).map { case (x, y) =>
-      if (random.nextDouble() < 0.3) Item.LightningScroll(x, y)
+      val roll = random.nextDouble()
+      if (roll < 0.1) Item.LightningScroll(x, y)
+      if (roll < 0.3) Item.ConfusionScroll(x, y)
       else Item.HealingPotion(x, y)
     }
 

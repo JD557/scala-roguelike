@@ -103,19 +103,18 @@ object AppState {
         if (effectiveAmount <= 0) applyAction(Action.NothingHappened)
         else
           mapState(_.printLine(Message.Healed(target, effectiveAmount)).updateEntity(target, newTarget))
+      case Action.ChangeBehavior(target, f) =>
+        mapState(_.updateEntity(target, target.updateBehavior(f)))
+
       case Action.UseItem(source, item) =>
         val updatedEntity = source.removeItem(item)
         if (source.inventory == updatedEntity.inventory) this
-        else
-          item.pickTarget(source, gameState.currentLevel.npcs) match {
-            case Some(target) =>
-              mapState(
-                _.printLine(Message.UsedItem(source, target, item))
-                  .updateEntity(source, updatedEntity)
-              ).applyActions(item.consumeResult(if (source == target) updatedEntity else target))
-            case None =>
-              applyAction(Action.NothingHappened)
-          }
+        else {
+          val action = item.consumeResult(updatedEntity, gameState.entities)
+          mapState(
+            _.printLine(Message.UsedItem(updatedEntity, item)).updateEntity(source, updatedEntity)
+          ).applyAction(action)
+        }
       case Action.DropItem(source, item) =>
         val updatedEntity = source.removeItem(item)
         if (source.inventory != updatedEntity.inventory)

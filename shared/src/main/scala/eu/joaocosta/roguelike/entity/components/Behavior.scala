@@ -49,7 +49,7 @@ object Behavior {
     }
   }
 
-  case class Confused(vision: Int, random: Random) extends SimpleBehavior {
+  case class Confused(random: Random) extends SimpleBehavior {
     def nextAction(player: Player, level: Level): Npc => Action = entity => {
       val (dx, dy) = random.shuffle(List((-1, 0), (1, 0), (0, -1), (0, 1))).head
       Action.Movement(entity, dx, dy)

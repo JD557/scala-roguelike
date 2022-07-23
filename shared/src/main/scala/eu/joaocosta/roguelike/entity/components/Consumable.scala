@@ -5,6 +5,6 @@ import eu.joaocosta.roguelike.entity.Entity
 
 object Consumable {
   trait Component {
-    def consumeResult(target: Entity): List[Action]
+    def consumeResult(user: Entity, entities: List[Entity]): Action
   }
 }
