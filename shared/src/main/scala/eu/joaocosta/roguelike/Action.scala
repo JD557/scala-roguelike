@@ -39,11 +39,12 @@ object Action {
     KeyboardInput.Key.Space -> NpcTurn
   )
 
-  val cursorMovementActions: ActionList = Map(
-    KeyboardInput.Key.Up    -> MoveCursor(0, -1),
-    KeyboardInput.Key.Down  -> MoveCursor(0, 1),
-    KeyboardInput.Key.Left  -> MoveCursor(-1, 0),
-    KeyboardInput.Key.Right -> MoveCursor(1, 0)
+  val menuActions: ActionList = Map(
+    KeyboardInput.Key.Escape -> ReturnToGame,
+    KeyboardInput.Key.Up     -> MoveCursor(0, -1),
+    KeyboardInput.Key.Down   -> MoveCursor(0, 1),
+    KeyboardInput.Key.Left   -> MoveCursor(-1, 0),
+    KeyboardInput.Key.Right  -> MoveCursor(1, 0)
   )
 
   val inGameActions: ActionList = playerMovementActions ++ Map(
@@ -53,19 +54,19 @@ object Action {
     KeyboardInput.Key.G -> PickUp
   )
 
-  val lookAroundActions: ActionList = cursorMovementActions ++ Map(
-    KeyboardInput.Key.L     -> ReturnToGame,
+  val lookAroundActions: ActionList = menuActions ++ Map(
     KeyboardInput.Key.Enter -> Select
   )
 
-  val historyViewActions: ActionList = cursorMovementActions ++ Map(
-    KeyboardInput.Key.V -> ReturnToGame
-  )
+  val historyViewActions: ActionList = menuActions
 
-  def inventoryViewActions(cursor: Int): ActionList = cursorMovementActions ++ Map(
-    KeyboardInput.Key.I -> ReturnToGame,
-    KeyboardInput.Key.D -> PlayerAction(p => p.inventory.items.drop(cursor).headOption.map(item => DropItem(p, item))),
-    KeyboardInput.Key.U -> PlayerAction(p => p.inventory.items.drop(cursor).headOption.map(item => UseItem(p, item)))
+  def inventoryViewActions(cursor: Int): ActionList = menuActions ++ Map(
+    KeyboardInput.Key.Backspace -> PlayerAction(p =>
+      p.inventory.items.drop(cursor).headOption.map(item => DropItem(p, item))
+    ),
+    KeyboardInput.Key.Enter -> PlayerAction(p =>
+      p.inventory.items.drop(cursor).headOption.map(item => UseItem(p, item))
+    )
   )
 
   def getActions(state: AppState, keyboard: KeyboardInput): Option[Action] = {
