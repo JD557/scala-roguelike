@@ -1,5 +1,7 @@
 package eu.joaocosta.roguelike.entity.components
 
+import scala.util.Random
+
 import eu.joaocosta.roguelike.entity.Entity
 import eu.joaocosta.roguelike.entity.entities._
 import eu.joaocosta.roguelike.{Action, Level}
@@ -44,6 +46,13 @@ object Behavior {
             Action.Movement(entity, dx, dy)
         }
       } else Action.Wait
+    }
+  }
+
+  case class Confused(vision: Int, random: Random) extends SimpleBehavior {
+    def nextAction(player: Player, level: Level): Npc => Action = entity => {
+      val (dx, dy) = random.shuffle(List((-1, 0), (1, 0), (0, -1), (0, 1))).head
+      Action.Movement(entity, dx, dy)
     }
   }
 
