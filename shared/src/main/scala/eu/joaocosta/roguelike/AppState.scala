@@ -104,7 +104,10 @@ object AppState {
         }
       case Action.GoDown =>
         if ((gameState.player.x, gameState.player.y) == gameState.currentLevel.gameMap.downStairs) {
-          mapState(_.nextLevel(constants.levelGenerator, AppState.rng))
+          mapState(
+            _.nextLevel(constants.levelGenerator, AppState.rng)
+              .printLine(Message.GoDown)
+          )
         } else this
       case Action.PickUp =>
         gameState.currentLevel.items.find(item => item.x == gameState.player.x && item.y == gameState.player.y) match {

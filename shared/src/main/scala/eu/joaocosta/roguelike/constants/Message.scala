@@ -6,6 +6,7 @@ import eu.joaocosta.roguelike.entity.entities._
 
 enum Message(val text: String, val color: Color) {
   case Welcome extends Message("Welcome to the Dungeon!", Pallete.blue)
+  case GoDown  extends Message("You went down the stairs", Pallete.blue)
   case Died(target: Entity)
       extends Message(
         s"${target.name} died",
