@@ -12,4 +12,6 @@ object Resources {
   // Font extended with Kenney Sprites
   val richFont =
     SpriteSheet(Image.loadBmpImage(Resource("gloop_kenney.bmp")).get, constants.spriteWidth, constants.spriteHeight)
+
+  val saveGame = Resource("game.sav")
 }

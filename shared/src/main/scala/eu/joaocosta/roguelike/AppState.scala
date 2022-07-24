@@ -22,9 +22,9 @@ object AppState {
         copy(cursor = math.min(math.max(0, cursor + dy), 2))
       case Action.Select =>
         cursor match {
-          case 0 => InGame(GameState.initialState(AppState.rng)) // New game
-          case 1 => this                                         // TODO Load game
-          case 2 => Leaving                                      // Quit Game
+          case 0 => InGame(GameState.initialState(AppState.rng))       // New game
+          case 1 => InGame(savestate.loadGame(Resources.saveGame).get) // Load game
+          case 2 => Leaving                                            // Quit Game
           case _ => this
         }
       case _ => this
@@ -40,9 +40,11 @@ object AppState {
       case Action.Select =>
         cursor match {
           case 0 => applyAction(Action.ReturnToGame) // Continue
-          case 1 => this                             // TODO Save game
-          case 2 => Menu(0)                          // Back to Menu
-          case 3 => Leaving                          // Quit Game
+          case 1 => // Save Game
+            savestate.saveGame(Resources.saveGame, gameState)
+            applyAction(Action.ReturnToGame)
+          case 2 => Menu(0) // Back to Menu
+          case 3 => Leaving // Quit Game
           case _ => this
         }
       case _ => this
