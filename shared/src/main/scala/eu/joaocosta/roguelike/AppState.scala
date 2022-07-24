@@ -16,15 +16,21 @@ object AppState {
   private val rng            = scala.util.Random(0) // not really purely functional, but should make games reproducible
   val initialState: AppState = Menu(0)
 
-  case class Menu(cursor: Int) extends AppState {
+  case class Menu(cursor: Int, message: Option[String] = None) extends AppState {
     def applyAction(action: Action): AppState = action match {
       case Action.MoveCursor(_, dy) =>
-        copy(cursor = math.min(math.max(0, cursor + dy), 2))
+        copy(cursor = math.min(math.max(0, cursor + dy), 2), message = None)
       case Action.Select =>
         cursor match {
-          case 0 => InGame(GameState.initialState(AppState.rng))       // New game
-          case 1 => InGame(savestate.loadGame(Resources.saveGame).get) // Load game
-          case 2 => Leaving                                            // Quit Game
+          case 0 => InGame(GameState.initialState(AppState.rng)) // New game
+          case 1 => // Load Game
+            savestate
+              .loadGame(Resources.saveGame)
+              .fold(
+                _ => copy(message = Some("Failed to load game")),
+                gameState => InGame(gameState)
+              )
+          case 2 => Leaving // Quit Game
           case _ => this
         }
       case _ => this
