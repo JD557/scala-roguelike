@@ -19,9 +19,10 @@ case class GameState(currentLevel: Level, player: Player, exploredTiles: Set[(In
     )
   }
 
-  def updateEntity(oldEntity: Entity, newEntity: Entity): GameState = newEntity match {
-    case p: Player => copy(player = p)
-    case _         => copy(currentLevel = currentLevel.updateEntity(oldEntity, Some(newEntity)))
+  def updateEntity(oldEntity: Entity, newEntity: Entity): GameState = (oldEntity, newEntity) match {
+    case (_: Player, p: Player) => copy(player = p)
+    case (_: Player, p: Corpse) => copy(player = player.updateFighter(_.copy(hp = 0)))
+    case _                      => copy(currentLevel = currentLevel.updateEntity(oldEntity, Some(newEntity)))
   }
 
   def addEntity(entity: Entity): GameState =

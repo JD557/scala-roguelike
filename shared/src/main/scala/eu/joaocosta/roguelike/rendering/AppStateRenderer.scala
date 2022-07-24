@@ -10,6 +10,7 @@ import eu.joaocosta.minart.input._
 import eu.joaocosta.roguelike.AppState._
 import eu.joaocosta.roguelike.constants.Pallete
 import eu.joaocosta.roguelike.entity._
+import eu.joaocosta.roguelike.entity.entities.Player
 import eu.joaocosta.roguelike.{AppState, GameMap, GameState, constants}
 
 object AppStateRenderer extends ChainingSyntax {
@@ -94,45 +95,69 @@ object AppStateRenderer extends ChainingSyntax {
   }
 
   private def putPlayerStatus(state: GameState)(window: Window): Window = {
-    val filledTiles = (constants.hpBarSize * state.player.fighter.hp) / state.player.fighter.maxHp
-    val freeTiles   = constants.hpBarSize - filledTiles
-    val barText = s" HP: ${state.player.fighter.hp}/${state.player.fighter.maxHp}"
-      .padTo(constants.hpBarSize, ' ')
-      .take(constants.hpBarSize)
+    def drawBar(text: String, filled: Int, total: Int, barSize: Int, filledColor: Color, emptyColor: Color): Window = {
+      val filledTiles = (barSize * filled) / total
+      val freeTiles   = barSize - filledTiles
+      val barText     = (s" $text: $filled/$total").padTo(barSize, ' ').take(barSize)
+      Window.empty
+        .printLine(
+          0,
+          0,
+          barText.take(filledTiles),
+          Pallete.white,
+          filledColor
+        )
+        .printLine(
+          filledTiles,
+          0,
+          barText.drop(filledTiles),
+          Pallete.white,
+          emptyColor
+        )
+    }
+    val hpBar = drawBar(
+      "HP",
+      state.player.fighter.hp,
+      state.player.fighter.maxHp,
+      constants.barSize,
+      Pallete.green,
+      Pallete.red
+    )
+    val expBar = drawBar(
+      "EXP",
+      state.player.exp,
+      Player.nextLevel(state.player.level),
+      constants.barSize,
+      Pallete.blue,
+      Pallete.darkBlue
+    )
     window
+      .putWindow(constants.leftStatusX, constants.statusY, hpBar)
       .printLine(
-        0,
-        constants.screenHeight - constants.maxMessages,
-        barText.take(filledTiles),
-        Pallete.white,
-        Pallete.green
+        constants.leftStatusX,
+        constants.statusY + 1,
+        s" ATK: ${state.player.fighter.attack}"
       )
       .printLine(
-        filledTiles,
-        constants.screenHeight - constants.maxMessages,
-        barText.drop(filledTiles),
-        Pallete.white,
-        Pallete.red
+        constants.leftStatusX,
+        constants.statusY + 2,
+        s" DEF: ${state.player.fighter.defense}"
       )
       .printLine(
-        1,
-        constants.screenHeight - constants.maxMessages + 1,
-        s"ATK: ${state.player.fighter.attack}"
+        constants.leftStatusX,
+        constants.statusY + 3,
+        s" ITEMS: ${state.player.inventory.items.size}/${state.player.inventory.capacity}"
+      )
+      .putWindow(constants.rightStatusX, constants.statusY, expBar)
+      .printLine(
+        constants.rightStatusX,
+        constants.statusY + 1,
+        s" LEVEL: ${state.player.level}"
       )
       .printLine(
-        11,
-        constants.screenHeight - constants.maxMessages + 1,
-        s"DEF: ${state.player.fighter.defense}"
-      )
-      .printLine(
-        1,
-        constants.screenHeight - constants.maxMessages + 2,
-        s"CAP: ${state.player.inventory.items.size}/${state.player.inventory.capacity}"
-      )
-      .printLine(
-        1,
-        constants.screenHeight - constants.maxMessages + 3,
-        s"FLOOR: ${state.currentLevel.floor}"
+        constants.rightStatusX,
+        constants.statusY + 2,
+        s" FLOOR: ${state.currentLevel.floor}"
       )
   }
 
@@ -245,6 +270,41 @@ object AppStateRenderer extends ChainingSyntax {
         .pipe(putGameTiles(inventoryView.currentState))
         .pipe(printInventory(inventoryView))
         .pipe(putPlayerStatus(inventoryView.currentState))
+    case LevelUp(gameState, cursor) =>
+      val subwindow = Window.empty
+        .printLine(
+          0,
+          0,
+          s"Constitution (+${constants.hpBonus})",
+          Pallete.white,
+          if (cursor == 0) Pallete.gray else Pallete.black
+        )
+        .printLine(
+          0,
+          1,
+          s"Attack (+${constants.attackBonus})",
+          Pallete.white,
+          if (cursor == 1) Pallete.gray else Pallete.black
+        )
+        .printLine(
+          0,
+          2,
+          s"Defense (+${constants.defenseBonus})",
+          Pallete.white,
+          if (cursor == 2) Pallete.gray else Pallete.black
+        )
+      Window.empty
+        .pipe(putGameTiles(gameState))
+        .pipe(
+          addPopup(
+            constants.popUpX,
+            constants.screenHeight - 6,
+            constants.popUpX + constants.popUpW,
+            constants.screenHeight - 1,
+            "Level Up",
+            subwindow
+          )
+        )
     case _ => Window.empty
   }
 }

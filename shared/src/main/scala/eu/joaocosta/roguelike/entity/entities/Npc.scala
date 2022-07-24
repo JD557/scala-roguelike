@@ -15,7 +15,7 @@ object Npc {
   case class Orc(
       x: Int,
       y: Int,
-      fighter: Fighter = Fighter(10, 10, 3, 0, "punched"),
+      fighter: Fighter = Fighter(10, 10, 3, 0, "punched", 35),
       ai: Behavior = Behavior.JustStare(constants.playerVision)
   ) extends Npc {
     val name   = "Orc"
@@ -28,7 +28,7 @@ object Npc {
   case class Troll(
       x: Int,
       y: Int,
-      fighter: Fighter = Fighter(16, 16, 4, 1, "clubed"),
+      fighter: Fighter = Fighter(16, 16, 4, 1, "clubed", 100),
       ai: Behavior = Behavior.Hostile(constants.playerVision)
   ) extends Npc {
     val name   = "Troll"

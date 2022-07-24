@@ -1,5 +1,6 @@
 package eu.joaocosta.roguelike
 
+import scala.collection.immutable.LazyList.cons
 import scala.util.Random
 
 import eu.joaocosta.roguelike.AppState._
@@ -66,8 +67,8 @@ object AppState {
       case Action.PauseGame => Pause(gameState, 0)
       case Action.LookAround(triggerAction, radius) =>
         LookAround(gameState, gameState.player.x, gameState.player.y, triggerAction, radius)
-      case Action.ViewHistory   => HistoryView(gameState, 0)
-      case Action.ViewInventory => InventoryView(gameState, 0)
+      case Action.ViewHistory   => HistoryView(gameState)
+      case Action.ViewInventory => InventoryView(gameState)
       case Action.Wait          => this
       case Action.NothingHappened =>
         mapState(_.printLine(Message.NothingHappened))
@@ -133,13 +134,19 @@ object AppState {
           val nextState = mapState(
             _.printLine(Message.Damaged(target, damage))
               .printLine(Message.Died(target))
-              .updateEntity(
-                target,
-                if (target == gameState.player) newTarget
-                else Corpse(newTarget)
-              )
+              .updateEntity(target, Corpse(newTarget))
           )
-          if (target == gameState.player) GameOver(nextState.gameState) else nextState
+          if (target == gameState.player) GameOver(nextState.gameState)
+          else {
+            val newPlayer = gameState.player.addExp(target.fighter.expGiven)
+            val nextNextState = nextState.mapState(st =>
+              st.printLine(Message.GainedExp(target.fighter.expGiven))
+                .updateEntity(gameState.player, newPlayer)
+            )
+            if (newPlayer.level > gameState.player.level)
+              LevelUp(nextNextState.gameState.printLine(Message.LevelUp))
+            else nextNextState
+          }
         } else
           mapState(
             _.printLine(Message.Damaged(target, damage))
@@ -223,7 +230,7 @@ object AppState {
     }
   }
 
-  case class HistoryView(currentState: GameState, scroll: Int) extends AppState {
+  case class HistoryView(currentState: GameState, scroll: Int = 0) extends AppState {
     def applyAction(action: Action): AppState = action match {
       case Action.ReturnToGame => InGame(currentState)
       case Action.MoveCursor(_, dy) =>
@@ -234,7 +241,7 @@ object AppState {
     }
   }
 
-  case class InventoryView(currentState: GameState, cursor: Int) extends AppState {
+  case class InventoryView(currentState: GameState, cursor: Int = 0) extends AppState {
     def applyAction(action: Action): AppState = action match {
       case Action.ReturnToGame => InGame(currentState)
       case Action.MoveCursor(_, dy) =>
@@ -243,6 +250,26 @@ object AppState {
         else copy(cursor = nextCursor)
       case playerAction: Action.PlayerAction =>
         InGame(currentState).applyAction(playerAction)
+      case _ => this
+    }
+  }
+
+  case class LevelUp(currentState: GameState, cursor: Int = 0) extends AppState {
+    def applyAction(action: Action): AppState = action match {
+      case Action.MoveCursor(_, dy) =>
+        val nextCursor = cursor + dy
+        if (nextCursor < 0 || nextCursor > 3) this
+        else copy(cursor = nextCursor)
+      case Action.Select =>
+        val newPlayer = currentState.player.updateFighter(fighter =>
+          cursor match {
+            case 0 => fighter.copy(hp = fighter.hp + constants.hpBonus, maxHp = fighter.maxHp + constants.hpBonus)
+            case 1 => fighter.copy(attack = fighter.attack + constants.attackBonus)
+            case 2 => fighter.copy(defense = fighter.defense + constants.defenseBonus)
+            case _ => fighter
+          }
+        )
+        InGame(currentState.updateEntity(currentState.player, newPlayer))
       case _ => this
     }
   }

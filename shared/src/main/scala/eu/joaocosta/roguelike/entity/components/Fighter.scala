@@ -2,7 +2,7 @@ package eu.joaocosta.roguelike.entity.components
 
 import eu.joaocosta.roguelike.entity.Entity
 
-case class Fighter(hp: Int, maxHp: Int, attack: Int, defense: Int, attackVerb: String) {
+case class Fighter(hp: Int, maxHp: Int, attack: Int, defense: Int, attackVerb: String, expGiven: Int = 0) {
   val isDead: Boolean = hp <= 0
   def computeDamage(that: Fighter): Int =
     math.min(math.max(0, this.attack - that.defense), that.hp)

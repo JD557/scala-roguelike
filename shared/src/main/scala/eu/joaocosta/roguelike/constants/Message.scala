@@ -29,6 +29,8 @@ enum Message(val text: String, val color: Color) {
         s"${target.name} recovered ${effectiveAmount} HP",
         Message.ifPlayer(target, Pallete.green, Pallete.darkGreen)
       )
+  case GainedExp(exp: Int) extends Message(s"You gained ${exp} exp", Pallete.yellow)
+  case LevelUp             extends Message(s"You leveled up!", Pallete.lightBlue)
   case Stare(source: Entity, target: Entity)
       extends Message(s"${source.name} is looking at ${target.name}", Pallete.gray)
   case InventoryFull(source: Entity) extends Message(s"${source.name} can't carry anything else", Pallete.orange)

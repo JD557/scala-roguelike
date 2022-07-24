@@ -76,6 +76,7 @@ object Action {
           case _: AppState.InGame         => inGameActions.get(key)
           case _: AppState.LookAround     => menuActions.get(key)
           case _: AppState.HistoryView    => menuActions.get(key)
+          case _: AppState.LevelUp        => menuActions.get(key)
           case st: AppState.InventoryView => inventoryViewActions(st.cursor).get(key)
           case _: AppState.GameOver       => menuActions.get(key)
           case _                          => None
