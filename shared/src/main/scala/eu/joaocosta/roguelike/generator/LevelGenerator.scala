@@ -6,7 +6,7 @@ import scala.util.Random
 import eu.joaocosta.roguelike._
 
 trait LevelGenerator {
-  def generateLevel(random: Random): Level
+  def generateLevel(random: Random, floor: Int): Level
 }
 
 object LevelGenerator {

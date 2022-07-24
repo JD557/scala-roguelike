@@ -1,17 +1,24 @@
 package eu.joaocosta.roguelike
 
 import scala.annotation.tailrec
+import scala.util.Random
 
 import eu.joaocosta.roguelike.entity.Entity
 import eu.joaocosta.roguelike.entity.entities._
+import eu.joaocosta.roguelike.generator.LevelGenerator
 
 case class Level(
+    floor: Int,
     gameMap: GameMap,
     entities: List[Entity]
 ) {
   lazy val playerStart: (Int, Int) = gameMap.upStairs
   lazy val npcs: List[Npc]         = entities.collect { case npc: Npc => npc }
   lazy val items: List[Item]       = entities.collect { case item: Item => item }
+
+  def nextLevel(generator: LevelGenerator, random: Random): Level = {
+    generator.generateLevel(random, floor + 1)
+  }
 
   def isWalkable(x: Int, y: Int) =
     gameMap.tiles.get((x, y)).forall(_.walkable) && !entities.exists(e => !e.isWalkable && x == e.x && y == e.y)

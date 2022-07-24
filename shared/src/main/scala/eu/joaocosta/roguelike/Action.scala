@@ -16,6 +16,7 @@ enum Action {
   case Stare(source: Entity, destination: Entity)
   case PlayerAction(f: Player => Option[Action])
   case PickUp
+  case GoDown
   case Movement(target: MoveableEntity, dx: Int, dy: Int)
   case Attack(source: FighterEntity, target: FighterEntity)
   case Damage(targets: List[FighterEntity], amount: Int)
@@ -53,6 +54,7 @@ object Action {
     KeyboardInput.Key.L      -> LookAround(_ => ReturnToGame),
     KeyboardInput.Key.V      -> ViewHistory,
     KeyboardInput.Key.I      -> ViewInventory,
+    KeyboardInput.Key.D      -> GoDown,
     KeyboardInput.Key.G      -> PickUp
   )
 

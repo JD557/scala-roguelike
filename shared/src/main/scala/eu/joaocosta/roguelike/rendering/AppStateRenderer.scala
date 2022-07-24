@@ -129,6 +129,11 @@ object AppStateRenderer extends ChainingSyntax {
         constants.screenHeight - constants.maxMessages + 2,
         s"CAP: ${state.player.inventory.items.size}/${state.player.inventory.capacity}"
       )
+      .printLine(
+        1,
+        constants.screenHeight - constants.maxMessages + 3,
+        s"FLOOR: ${state.currentLevel.floor}"
+      )
   }
 
   private def printSelectedEntities(state: GameState, cursorPos: Option[(Int, Int, Int)])(

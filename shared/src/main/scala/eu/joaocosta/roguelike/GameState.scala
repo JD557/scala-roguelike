@@ -5,8 +5,19 @@ import scala.util.Random
 import eu.joaocosta.roguelike.constants.Message
 import eu.joaocosta.roguelike.entity._
 import eu.joaocosta.roguelike.entity.entities._
+import eu.joaocosta.roguelike.generator.LevelGenerator
 
 case class GameState(currentLevel: Level, player: Player, exploredTiles: Set[(Int, Int)], messages: List[Message]) {
+
+  def nextLevel(generator: LevelGenerator, random: Random): GameState = {
+    val newLevel = currentLevel.nextLevel(generator, random)
+    GameState(
+      newLevel,
+      player.copy(x = newLevel.gameMap.upStairs._1, y = newLevel.gameMap.upStairs._2),
+      Set.empty,
+      messages
+    )
+  }
 
   def updateEntity(oldEntity: Entity, newEntity: Entity): GameState = newEntity match {
     case p: Player => copy(player = p)
@@ -38,7 +49,7 @@ case class GameState(currentLevel: Level, player: Player, exploredTiles: Set[(In
 
 object GameState {
   def initialState(rng: Random): GameState = {
-    val initialLevel  = constants.levelGenerator.generateLevel(rng)
+    val initialLevel  = constants.levelGenerator.generateLevel(rng, 0)
     val initialPlayer = Player(initialLevel.playerStart._1, initialLevel.playerStart._2)
     GameState(
       currentLevel = initialLevel,

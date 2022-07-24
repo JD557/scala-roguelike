@@ -32,7 +32,7 @@ case class DefaultLevelGenerator(
       else Item.HealingPotion(x, y)
     }
 
-  def generateLevel(random: Random): Level = {
+  def generateLevel(random: Random, floor: Int): Level = {
     @tailrec
     def genRooms(
         rooms: List[Room.RectangularRoom] = Nil,
@@ -72,6 +72,7 @@ case class DefaultLevelGenerator(
       ((0 until width).flatMap(x => (0 until height).map(y => (x, y) -> GameMap.Tile.Wall)).iterator ++
         (rooms.iterator ++ tunnels.iterator).flatMap(_.tiles).map(pos => pos -> GameMap.Tile.Floor)).toMap
     Level(
+      floor = floor,
       gameMap = GameMap(rooms.head.center, rooms.last.center, map),
       entities = rooms.tail.flatMap(room => generateEnemies(room, random) ++ generateItems(room, random))
     )
