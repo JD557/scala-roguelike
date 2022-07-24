@@ -6,13 +6,12 @@ import eu.joaocosta.roguelike.entity.Entity
 import eu.joaocosta.roguelike.entity.entities._
 
 case class Level(
-    playerStart: Player,
     gameMap: GameMap,
     entities: List[Entity]
 ) {
-
-  lazy val npcs: List[Npc]   = entities.collect { case npc: Npc => npc }
-  lazy val items: List[Item] = entities.collect { case item: Item => item }
+  lazy val playerStart: (Int, Int) = gameMap.upStairs
+  lazy val npcs: List[Npc]         = entities.collect { case npc: Npc => npc }
+  lazy val items: List[Item]       = entities.collect { case item: Item => item }
 
   def isWalkable(x: Int, y: Int) =
     gameMap.tiles.get((x, y)).forall(_.walkable) && !entities.exists(e => !e.isWalkable && x == e.x && y == e.y)

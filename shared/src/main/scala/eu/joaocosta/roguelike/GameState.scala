@@ -38,10 +38,11 @@ case class GameState(currentLevel: Level, player: Player, exploredTiles: Set[(In
 
 object GameState {
   def initialState(rng: Random): GameState = {
-    val initialLevel = constants.levelGenerator.generateLevel(rng)
+    val initialLevel  = constants.levelGenerator.generateLevel(rng)
+    val initialPlayer = Player(initialLevel.playerStart._1, initialLevel.playerStart._2)
     GameState(
       currentLevel = initialLevel,
-      player = initialLevel.playerStart,
+      player = initialPlayer,
       exploredTiles = Set(),
       messages = List(Message.Welcome)
     )

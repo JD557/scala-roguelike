@@ -72,8 +72,7 @@ case class DefaultLevelGenerator(
       ((0 until width).flatMap(x => (0 until height).map(y => (x, y) -> GameMap.Tile.Wall)).iterator ++
         (rooms.iterator ++ tunnels.iterator).flatMap(_.tiles).map(pos => pos -> GameMap.Tile.Floor)).toMap
     Level(
-      playerStart = Player(rooms.head.center._1, rooms.head.center._2),
-      gameMap = GameMap(map),
+      gameMap = GameMap(rooms.head.center, rooms.last.center, map),
       entities = rooms.tail.flatMap(room => generateEnemies(room, random) ++ generateItems(room, random))
     )
   }

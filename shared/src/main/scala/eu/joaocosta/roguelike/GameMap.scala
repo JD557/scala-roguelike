@@ -5,7 +5,15 @@ import scala.annotation.tailrec
 import eu.joaocosta.roguelike.constants.Pallete
 import eu.joaocosta.roguelike.rendering.Window
 
-case class GameMap(tiles: Map[(Int, Int), GameMap.Tile]) {
+case class GameMap(
+    upStairs: (Int, Int),
+    downStairs: (Int, Int),
+    wallsAndFloor: Map[(Int, Int), GameMap.Tile]
+) {
+
+  val tiles: Map[(Int, Int), GameMap.Tile] =
+    wallsAndFloor + (upStairs -> GameMap.Tile.UpStairs) + (downStairs -> GameMap.Tile.DownStairs)
+
   def isTransparent(x: Int, y: Int) = tiles.get((x, y)).forall(_.walkable)
 
   def visibleFrom(x: Int, y: Int, range: Int): Set[(Int, Int)] = {
@@ -49,14 +57,26 @@ object GameMap {
     case Wall
         extends Tile(
           walkable = false,
-          sprite = Window.Sprite('#', Pallete.red, Pallete.orange),
-          darkSprite = Window.Sprite('#', Pallete.darkGray, Pallete.gray)
+          sprite = Window.Sprite('#', Pallete.darkBrown, Pallete.gray),
+          darkSprite = Window.Sprite('#', Pallete.black, Pallete.darkGray)
         )
     case Floor
         extends Tile(
           walkable = true,
-          sprite = Window.Sprite(' ', Pallete.yellow, Pallete.orange),
-          darkSprite = Window.Sprite(' ', Pallete.white, Pallete.gray)
+          sprite = Window.Sprite(' ', Pallete.white, Pallete.gray),
+          darkSprite = Window.Sprite(' ', Pallete.gray, Pallete.darkGray)
+        )
+    case UpStairs
+        extends Tile(
+          walkable = true,
+          sprite = Window.Sprite('<', Pallete.brown, Pallete.gray),
+          darkSprite = Window.Sprite('<', Pallete.darkBrown, Pallete.darkGray)
+        )
+    case DownStairs
+        extends Tile(
+          walkable = true,
+          sprite = Window.Sprite('>', Pallete.darkBlue, Pallete.gray),
+          darkSprite = Window.Sprite('>', Pallete.black, Pallete.darkGray)
         )
   }
 }
