@@ -16,7 +16,7 @@ object Npc {
       x: Int,
       y: Int,
       fighter: Fighter = Fighter(10, 10, 3, 0, "punched", 35),
-      ai: Behavior = Behavior.JustStare(constants.playerVision)
+      ai: Behavior = Behavior.Hostile(constants.playerVision)
   ) extends Npc {
     val name   = "Orc"
     val sprite = Window.Sprite('o', Pallete.darkGreen)

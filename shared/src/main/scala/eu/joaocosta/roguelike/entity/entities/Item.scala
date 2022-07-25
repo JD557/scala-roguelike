@@ -45,7 +45,7 @@ object Item {
   }
   case class FireballScroll(x: Int, y: Int, damage: Int = 12, radius: Int = 2) extends Item {
     val name   = "Fireball scroll"
-    val sprite = Window.Sprite('~', Pallete.yellow)
+    val sprite = Window.Sprite('~', Pallete.red)
     def setPosition(x: Int, y: Int): FireballScroll =
       copy(x = x, y = y)
     def consumeResult(user: Entity, entities: List[Entity]): Action = {
@@ -61,7 +61,7 @@ object Item {
   }
   case class ConfusionScroll(x: Int, y: Int, turns: Int = 10) extends Item {
     val name   = "Confusion scroll"
-    val sprite = Window.Sprite('~', Pallete.yellow)
+    val sprite = Window.Sprite('~', Pallete.green)
     def setPosition(x: Int, y: Int): ConfusionScroll =
       copy(x = x, y = y)
     def consumeResult(user: Entity, entities: List[Entity]): Action =

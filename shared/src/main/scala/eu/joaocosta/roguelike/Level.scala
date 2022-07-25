@@ -42,7 +42,7 @@ case class Level(
       }.toMap
       val nextCandidates = newPaths.keySet
       val nextPaths      = paths ++ newPaths
-      if (nextCandidates.contains((x2, y2))) nextPaths
+      if (nextCandidates.contains((x2, y2)) || nextCandidates.isEmpty) nextPaths
       else genPaths(nextCandidates, nextPaths)
     }
     val paths = genPaths(candidates = Set((x1, y1)), paths = Map.empty)
