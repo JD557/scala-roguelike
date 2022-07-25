@@ -6,6 +6,7 @@ import scala.util.Random
 import eu.joaocosta.roguelike._
 import eu.joaocosta.roguelike.entity.Entity
 import eu.joaocosta.roguelike.entity.entities._
+import eu.joaocosta.roguelike.random.Distribution
 
 case class DefaultLevelGenerator(
     width: Int,

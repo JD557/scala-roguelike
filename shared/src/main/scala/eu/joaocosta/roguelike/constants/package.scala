@@ -2,7 +2,7 @@ package eu.joaocosta.roguelike
 
 import eu.joaocosta.roguelike.entity.entities.Item.FireballScroll
 import eu.joaocosta.roguelike.entity.entities.{Item, Npc}
-import eu.joaocosta.roguelike.generator.Distribution
+import eu.joaocosta.roguelike.random.Distribution
 
 package object constants {
   val title = "The Minartaur's Lair"

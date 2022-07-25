@@ -4,6 +4,7 @@ import scala.annotation.tailrec
 import scala.util.Random
 
 import eu.joaocosta.roguelike._
+import eu.joaocosta.roguelike.random.Distribution
 
 trait LevelGenerator {
   def generateLevel(random: Random, floor: Int): Level

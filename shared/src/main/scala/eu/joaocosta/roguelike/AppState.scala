@@ -14,7 +14,6 @@ sealed trait AppState {
 }
 
 object AppState {
-  private val rng            = scala.util.Random(0) // not really purely functional, but should make games reproducible
   val initialState: AppState = Menu(0)
 
   case class Menu(cursor: Int, message: Option[String] = None) extends AppState {
@@ -23,7 +22,7 @@ object AppState {
         copy(cursor = math.min(math.max(0, cursor + dy), 2), message = None)
       case Action.Select =>
         cursor match {
-          case 0 => InGame(GameState.initialState(AppState.rng)) // New game
+          case 0 => InGame(GameState.initialState(random.rng)) // New game
           case 1 => // Load Game
             savestate
               .loadGame(Resources.saveGame)
@@ -106,7 +105,7 @@ object AppState {
       case Action.GoDown =>
         if ((gameState.player.x, gameState.player.y) == gameState.currentLevel.gameMap.downStairs) {
           mapState(
-            _.nextLevel(constants.levelGenerator, AppState.rng)
+            _.nextLevel(constants.levelGenerator, random.rng)
               .printLine(Message.GoDown)
           )
         } else this
@@ -189,7 +188,8 @@ object AppState {
       case Action.NpcTurn =>
         gameState.currentLevel.npcs.foldLeft(this: AppState) {
           case (inGame: InGame, npc) =>
-            val (nextBehavior, nextAction) = npc.ai.next(inGame.gameState.player, inGame.gameState.currentLevel, rng)
+            val (nextBehavior, nextAction) =
+              npc.ai.next(inGame.gameState.player, inGame.gameState.currentLevel, random.rng)
             val newNpc =
               if (nextBehavior != npc.ai) npc.updateBehavior(_ => nextBehavior)
               else npc
