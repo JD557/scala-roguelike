@@ -5,8 +5,7 @@ import eu.joaocosta.roguelike.entity._
 case class Inventory(items: List[entities.Item], capacity: Int) {
   val isFull = items.size >= capacity
   def addItem(item: entities.Item): Inventory =
-    if (items.size < capacity)
-      copy(items = item :: items)
+    if (!isFull) copy(items = item :: items)
     else this
   def removeItem(item: entities.Item): Inventory = {
     val (left, right) = items.span(_ != item)

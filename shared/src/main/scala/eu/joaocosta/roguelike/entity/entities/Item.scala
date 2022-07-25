@@ -30,17 +30,23 @@ object Item {
     def setPosition(x: Int, y: Int): LightningScroll =
       copy(x = x, y = y)
     def consumeResult(user: Entity, entities: List[Entity]): Action = {
+      def distance(x: Int, y: Int): Int = {
+        val dx = (user.x - x)
+        val dy = (user.y - y)
+        (dx * dx + dy * dy)
+      }
+      val maxDistance = maxRange * maxRange
       entities.iterator
-        .collect {
-          case (entity: FighterEntity) if entity != user =>
-            val dx = (user.x - entity.x)
-            val dy = (user.y - entity.y)
-            (entity, (dx * dx + dy * dy))
+        .foldLeft[Option[(FighterEntity, Int)]](None) {
+          case (closestEntity, e1: FighterEntity) =>
+            val dist1 = distance(e1.x, e1.y)
+            if (dist1 < maxRange) closestEntity.map { case (e2, dist2) =>
+              if (dist1 < dist2) (e1, dist1) else (e2, dist2)
+            }
+            else closestEntity
+          case (closestEntity, _) => closestEntity
         }
-        .filter(_._2 < maxRange * maxRange)
-        .minByOption(_._2)
-        .map { case (entity, _) => Action.Damage(List(entity), damage) }
-        .getOrElse(Action.NothingHappened)
+        .fold(Action.NothingHappened) { case (entity, _) => Action.Damage(List(entity), damage) }
     }
   }
   case class FireballScroll(x: Int, y: Int, damage: Int = 12, radius: Int = 2) extends Item {
