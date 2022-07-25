@@ -1,5 +1,9 @@
 package eu.joaocosta.roguelike
 
+import eu.joaocosta.roguelike.entity.entities.Item.FireballScroll
+import eu.joaocosta.roguelike.entity.entities.{Item, Npc}
+import eu.joaocosta.roguelike.generator.LevelGenerator.Distribution
+
 package object constants {
   val title = "The Minartaur's Lair"
 
@@ -15,8 +19,38 @@ package object constants {
     roomMaxSize = 10,
     roomMinSize = 6,
     maxRooms = 30,
-    maxMonsters = 2,
-    maxItems = 1
+    maxMonsters = {
+      case floor if floor < 4 => 2
+      case floor if floor < 6 => 3
+      case _                  => 5
+    },
+    monsterDistribution = {
+      case floor if floor < 3 => Distribution(80 -> (Npc.Orc(_, _)))
+      case floor if floor < 5 => Distribution(80 -> (Npc.Orc(_, _)), 15 -> (Npc.Troll(_, _)))
+      case floor if floor < 7 => Distribution(80 -> (Npc.Orc(_, _)), 30 -> (Npc.Troll(_, _)))
+      case _                  => Distribution(80 -> (Npc.Orc(_, _)), 60 -> (Npc.Troll(_, _)))
+    },
+    maxItems = {
+      case floor if floor < 4 => 1
+      case _                  => 2
+    },
+    itemDistribution = {
+      case floor if floor < 2 => Distribution(35 -> (Item.HealingPotion(_, _)))
+      case floor if floor < 4 => Distribution(35 -> (Item.HealingPotion(_, _)), 10 -> (Item.ConfusionScroll(_, _)))
+      case floor if floor < 6 =>
+        Distribution(
+          35 -> (Item.HealingPotion(_, _)),
+          10 -> (Item.ConfusionScroll(_, _)),
+          25 -> (Item.LightningScroll(_, _))
+        )
+      case _ =>
+        Distribution(
+          35 -> (Item.HealingPotion(_, _)),
+          10 -> (Item.ConfusionScroll(_, _)),
+          25 -> (Item.LightningScroll(_, _)),
+          25 -> (Item.FireballScroll(_, _))
+        )
+    }
   )
   val maxMessages = screenHeight - levelGenerator.height - 1
   val barSize     = 20

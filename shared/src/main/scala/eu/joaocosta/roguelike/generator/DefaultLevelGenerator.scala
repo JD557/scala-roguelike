@@ -6,6 +6,7 @@ import scala.util.Random
 import eu.joaocosta.roguelike._
 import eu.joaocosta.roguelike.entity.Entity
 import eu.joaocosta.roguelike.entity.entities._
+import eu.joaocosta.roguelike.generator.LevelGenerator.Distribution
 
 case class DefaultLevelGenerator(
     width: Int,
@@ -13,23 +14,20 @@ case class DefaultLevelGenerator(
     roomMaxSize: Int,
     roomMinSize: Int,
     maxRooms: Int,
-    maxMonsters: Int,
-    maxItems: Int
+    maxMonsters: Int => Int,
+    monsterDistribution: Int => Distribution[(Int, Int) => Npc],
+    maxItems: Int => Int,
+    itemDistribution: Int => Distribution[(Int, Int) => Item]
 ) extends LevelGenerator {
 
-  def generateEnemies(room: Room, random: Random): List[Npc] =
-    LevelGenerator.randomEntityPositions(room, maxMonsters, random).map { case (x, y) =>
-      if (random.nextDouble() < 0.2) Npc.Troll(x, y)
-      else Npc.Orc(x, y)
+  def generateEnemies(room: Room, random: Random, floor: Int): List[Npc] =
+    LevelGenerator.randomEntityPositions(room, maxMonsters(floor), random).map { case (x, y) =>
+      monsterDistribution(floor).sample(random)(x, y)
     }
 
-  def generateItems(room: Room, random: Random): List[Item] =
-    LevelGenerator.randomEntityPositions(room, maxItems, random).map { case (x, y) =>
-      val roll = random.nextDouble()
-      if (roll < 0.1) Item.LightningScroll(x, y)
-      else if (roll < 0.2) Item.FireballScroll(x, y)
-      else if (roll < 0.3) Item.ConfusionScroll(x, y)
-      else Item.HealingPotion(x, y)
+  def generateItems(room: Room, random: Random, floor: Int): List[Item] =
+    LevelGenerator.randomEntityPositions(room, maxItems(floor), random).map { case (x, y) =>
+      itemDistribution(floor).sample(random)(x, y)
     }
 
   def generateLevel(random: Random, floor: Int): Level = {
@@ -74,7 +72,7 @@ case class DefaultLevelGenerator(
     Level(
       floor = floor,
       gameMap = GameMap(rooms.head.center, rooms.last.center, map),
-      entities = rooms.tail.flatMap(room => generateEnemies(room, random) ++ generateItems(room, random))
+      entities = rooms.tail.flatMap(room => generateEnemies(room, random, floor) ++ generateItems(room, random, floor))
     )
   }
 }

@@ -10,6 +10,22 @@ trait LevelGenerator {
 }
 
 object LevelGenerator {
+  case class Distribution[T] private (entries: List[(Int, T)]) {
+    val preprocessedEntries: List[(Int, T)] =
+      entries.tail.scanLeft(entries.head) { case ((acc, _), (weight, x)) =>
+        (acc + weight, x)
+      }
+    val maxWeight = preprocessedEntries.last._1
+    def sample(random: Random): T = {
+      val roll = random.nextInt(maxWeight)
+      preprocessedEntries.find(_._1 >= roll).getOrElse(preprocessedEntries.last)._2
+    }
+  }
+  object Distribution {
+    def apply[T](hd: (Int, T), tl: (Int, T)*): Distribution[T] =
+      new Distribution[T](hd :: tl.toList)
+  }
+
   def randomEntityPositions(room: Room, maxEntities: Int, random: Random): List[(Int, Int)] =
     random.shuffle(room.tiles.iterator).take(random.nextInt(maxEntities + 1)).toList
 
