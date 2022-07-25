@@ -189,7 +189,7 @@ object AppState {
         gameState.currentLevel.npcs.foldLeft(this: AppState) {
           case (inGame: InGame, npc) =>
             val (nextBehavior, nextAction) =
-              npc.ai.next(inGame.gameState.player, inGame.gameState.currentLevel, random.rng)
+              npc.ai.next(inGame.gameState.player, inGame.gameState.currentLevel).sample(random.rng)
             val newNpc =
               if (nextBehavior != npc.ai) npc.updateBehavior(_ => nextBehavior)
               else npc
