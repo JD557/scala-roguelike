@@ -22,7 +22,7 @@ object AppState {
         copy(cursor = math.min(math.max(0, cursor + dy), 2), message = None)
       case Action.Select =>
         cursor match {
-          case 0 => InGame(GameState.initialState(random.rng)) // New game
+          case 0 => InGame(GameState.initialState.sample(random.rng)) // New game
           case 1 => // Load Game
             savestate
               .loadGame(Resources.saveGame)
@@ -105,7 +105,8 @@ object AppState {
       case Action.GoDown =>
         if ((gameState.player.x, gameState.player.y) == gameState.currentLevel.gameMap.downStairs) {
           mapState(
-            _.nextLevel(constants.levelGenerator, random.rng)
+            _.nextLevel(constants.levelGenerator)
+              .sample(random.rng)
               .printLine(Message.GoDown)
           )
         } else this

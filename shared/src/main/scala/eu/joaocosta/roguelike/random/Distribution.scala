@@ -18,7 +18,7 @@ sealed trait Distribution[+T] {
     if (n <= 0) Distribution.pure(Nil)
     else this.zipWith(repeatN(n - 1)) { case (x, xs) => x :: xs }
   def repeatUpToN(n: Int): Distribution[List[T]] =
-    Distribution.range(n).flatMap(repeatN)
+    Distribution.range(n + 1).flatMap(repeatN)
 }
 object Distribution {
   final case class Sampler[T](sampler: Random => T) extends Distribution[T] {

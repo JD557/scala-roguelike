@@ -1,22 +1,22 @@
 package eu.joaocosta.roguelike
 
-import scala.util.Random
-
 import eu.joaocosta.roguelike.constants.Message
 import eu.joaocosta.roguelike.entity._
 import eu.joaocosta.roguelike.entity.entities._
 import eu.joaocosta.roguelike.generator.LevelGenerator
+import eu.joaocosta.roguelike.random.Distribution
 
 case class GameState(currentLevel: Level, player: Player, exploredTiles: Set[(Int, Int)], messages: List[Message]) {
 
-  def nextLevel(generator: LevelGenerator, random: Random): GameState = {
-    val newLevel = currentLevel.nextLevel(generator, random)
-    GameState(
-      newLevel,
-      player.copy(x = newLevel.gameMap.upStairs._1, y = newLevel.gameMap.upStairs._2),
-      Set.empty,
-      messages
-    )
+  def nextLevel(generator: LevelGenerator): Distribution[GameState] = {
+    currentLevel.nextLevel(generator).map { newLevel =>
+      GameState(
+        newLevel,
+        player.copy(x = newLevel.gameMap.upStairs._1, y = newLevel.gameMap.upStairs._2),
+        Set.empty,
+        messages
+      )
+    }
   }
 
   def updateEntity(oldEntity: Entity, newEntity: Entity): GameState = (oldEntity, newEntity) match {
@@ -49,14 +49,14 @@ case class GameState(currentLevel: Level, player: Player, exploredTiles: Set[(In
 }
 
 object GameState {
-  def initialState(rng: Random): GameState = {
-    val initialLevel  = constants.levelGenerator.generateLevel(rng, 0)
-    val initialPlayer = Player(initialLevel.playerStart._1, initialLevel.playerStart._2)
-    GameState(
-      currentLevel = initialLevel,
-      player = initialPlayer,
-      exploredTiles = Set(),
-      messages = List(Message.Welcome)
-    )
-  }
+  def initialState: Distribution[GameState] =
+    constants.levelGenerator.generateLevel(0).map { initialLevel =>
+      val initialPlayer = Player(initialLevel.playerStart._1, initialLevel.playerStart._2)
+      GameState(
+        currentLevel = initialLevel,
+        player = initialPlayer,
+        exploredTiles = Set(),
+        messages = List(Message.Welcome)
+      )
+    }
 }
