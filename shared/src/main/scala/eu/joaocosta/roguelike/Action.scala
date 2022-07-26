@@ -2,7 +2,7 @@ package eu.joaocosta.roguelike
 
 import eu.joaocosta.minart.input._
 import eu.joaocosta.roguelike.entity._
-import eu.joaocosta.roguelike.entity.components.Behavior
+import eu.joaocosta.roguelike.entity.components._
 import eu.joaocosta.roguelike.entity.entities._
 
 enum Action {
@@ -22,8 +22,10 @@ enum Action {
   case Damage(targets: List[FighterEntity], amount: Int)
   case Heal(targets: List[FighterEntity], amount: Int)
   case ChangeBehavior(target: BehaviorEntity, f: Behavior => Behavior)
-  case UseItem(source: InventoryEntity, item: Item)
-  case DropItem(source: InventoryEntity, item: Item)
+  case Equip(source: FighterEntity, item: Equipment)
+  case Unequip(source: FighterEntity, item: Equipable.Slot)
+  case UseItem(source: InventoryEntity, item: ConsumableEntity)
+  case DropItem(source: InventoryEntity, item: Entity)
   case NpcTurn
   case MoveCursor(dx: Int, dy: Int)
   case Select
@@ -58,12 +60,13 @@ object Action {
     KeyboardInput.Key.G      -> PickUp
   )
 
-  def inventoryViewActions(cursor: Int): ActionList = menuActions ++ Map(
-    KeyboardInput.Key.Backspace -> PlayerAction(p =>
-      p.inventory.items.drop(cursor).headOption.map(item => DropItem(p, item))
-    ),
+  def inventoryViewActions(selectedItem: Option[Either[Equipment, ConsumableEntity]]): ActionList = menuActions ++ Map(
+    KeyboardInput.Key.Backspace -> PlayerAction(p => selectedItem.flatMap(_.toOption).map(item => DropItem(p, item))),
     KeyboardInput.Key.Enter -> PlayerAction(p =>
-      p.inventory.items.drop(cursor).headOption.map(item => UseItem(p, item))
+      selectedItem.map {
+        case Right(item)     => UseItem(p, item)
+        case Left(equipment) => Unequip(p, equipment.slot)
+      }
     )
   )
 
@@ -77,7 +80,7 @@ object Action {
           case _: AppState.LookAround     => menuActions.get(key)
           case _: AppState.HistoryView    => menuActions.get(key)
           case _: AppState.LevelUp        => menuActions.get(key)
-          case st: AppState.InventoryView => inventoryViewActions(st.cursor).get(key)
+          case st: AppState.InventoryView => inventoryViewActions(st.selectedItem).get(key)
           case _: AppState.GameOver       => menuActions.get(key)
           case _                          => None
         }

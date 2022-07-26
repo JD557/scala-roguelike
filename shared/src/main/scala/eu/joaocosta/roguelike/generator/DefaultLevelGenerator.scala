@@ -3,7 +3,7 @@ package eu.joaocosta.roguelike.generator
 import scala.annotation.tailrec
 
 import eu.joaocosta.roguelike._
-import eu.joaocosta.roguelike.entity.Entity
+import eu.joaocosta.roguelike.entity._
 import eu.joaocosta.roguelike.entity.entities._
 import eu.joaocosta.roguelike.generator.Room.RectangularRoom
 import eu.joaocosta.roguelike.random.Distribution
@@ -17,7 +17,7 @@ case class DefaultLevelGenerator(
     maxMonsters: Int => Int,
     monsterDistribution: Int => Distribution[(Int, Int) => Npc],
     maxItems: Int => Int,
-    itemDistribution: Int => Distribution[(Int, Int) => Item]
+    itemDistribution: Int => Distribution[(Int, Int) => ConsumableEntity]
 ) extends LevelGenerator {
 
   def generateEntities[E](

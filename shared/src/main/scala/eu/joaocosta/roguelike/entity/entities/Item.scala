@@ -9,7 +9,6 @@ import eu.joaocosta.roguelike.rendering.Window
 
 sealed trait Item extends Entity with Consumable.Component {
   val isWalkable = true
-
   def setPosition(x: Int, y: Int): Item
 }
 

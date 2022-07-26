@@ -1,7 +1,7 @@
 package eu.joaocosta.roguelike
 
 import eu.joaocosta.roguelike.entity.entities.Item.FireballScroll
-import eu.joaocosta.roguelike.entity.entities.{Item, Npc}
+import eu.joaocosta.roguelike.entity.entities.{Equipment, Item, Npc}
 import eu.joaocosta.roguelike.random.Distribution
 
 package object constants {
@@ -14,8 +14,8 @@ package object constants {
   val spriteHeight = 8
 
   val levelGenerator = generator.DefaultLevelGenerator(
-    width = 80,
-    height = 44,
+    width = screenWidth,
+    height = screenHeight - 7,
     roomMaxSize = 10,
     roomMinSize = 6,
     maxRooms = 30,
@@ -37,23 +37,32 @@ package object constants {
     itemDistribution = {
       case floor if floor < 2 => Distribution.weighted(35 -> (Item.HealingPotion(_, _)))
       case floor if floor < 4 =>
-        Distribution.weighted(35 -> (Item.HealingPotion(_, _)), 10 -> (Item.ConfusionScroll(_, _)))
+        Distribution.weighted(
+          35 -> (Item.HealingPotion(_, _)),
+          10 -> (Item.ConfusionScroll(_, _)),
+          5  -> (Equipment.Dagger(_, _)),
+          5  -> (Equipment.LeatherArmor(_, _))
+        )
       case floor if floor < 6 =>
         Distribution.weighted(
           35 -> (Item.HealingPotion(_, _)),
           10 -> (Item.ConfusionScroll(_, _)),
-          25 -> (Item.LightningScroll(_, _))
+          25 -> (Item.LightningScroll(_, _)),
+          5  -> (Equipment.Sword(_, _)),
+          5  -> (Equipment.LeatherArmor(_, _))
         )
       case _ =>
         Distribution.weighted(
           35 -> (Item.HealingPotion(_, _)),
           10 -> (Item.ConfusionScroll(_, _)),
           25 -> (Item.LightningScroll(_, _)),
-          25 -> (Item.FireballScroll(_, _))
+          25 -> (Item.FireballScroll(_, _)),
+          25 -> (Item.LightningScroll(_, _)),
+          15 -> (Equipment.ChainMail(_, _))
         )
     }
   )
-  val maxMessages = screenHeight - levelGenerator.height - 1
+  val maxMessages = screenHeight - levelGenerator.height - 2
   val barSize     = 20
 
   val popUpX = barSize

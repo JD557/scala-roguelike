@@ -26,6 +26,7 @@ final case class Player(
     else Window.Sprite('@', Pallete.white)
   val isWalkable = false
 
+  def setPosition(x: Int, y: Int): Player                = copy(x = x, y = y)
   def move(dx: Int, dy: Int): Player                     = copy(x = x + dx, y = y + dy)
   def updateFighter(f: Fighter => Fighter): Player       = copy(fighter = f(fighter))
   def updateInventory(f: Inventory => Inventory): Player = copy(inventory = f(inventory))

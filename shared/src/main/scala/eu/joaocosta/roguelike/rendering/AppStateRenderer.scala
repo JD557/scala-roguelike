@@ -10,6 +10,7 @@ import eu.joaocosta.minart.input._
 import eu.joaocosta.roguelike.AppState._
 import eu.joaocosta.roguelike.constants.Pallete
 import eu.joaocosta.roguelike.entity._
+import eu.joaocosta.roguelike.entity.components.Equipable.Slot
 import eu.joaocosta.roguelike.entity.entities.Player
 import eu.joaocosta.roguelike.{AppState, GameMap, GameState, constants}
 
@@ -182,7 +183,7 @@ object AppStateRenderer extends ChainingSyntax {
   private def printInventory(state: InventoryView)(
       window: Window
   ): Window = {
-    val subwindow = state.currentState.player.inventory.items.zipWithIndex
+    val itemSubwindow = state.currentState.player.inventory.items.zipWithIndex
       .foldLeft(Window.empty) { case (window, (item, idx)) =>
         window.printLine(
           0,
@@ -192,14 +193,53 @@ object AppStateRenderer extends ChainingSyntax {
           if (state.cursor == idx) Pallete.gray else Pallete.black
         )
       }
-    addPopup(
-      constants.popUpX,
-      0,
-      constants.popUpX + constants.popUpW,
-      constants.screenHeight - 1,
-      "Inventory",
-      subwindow
-    )(window)
+    val weapon = state.currentState.player.fighter.equipment
+      .get(Slot.Weapon)
+      .fold("(NONE)")(w => s"${w.name} (+ ${w.attackBonus} ATK)")
+    val armor = state.currentState.player.fighter.equipment
+      .get(Slot.Armor)
+      .fold("(NONE)")(a => s"${a.name} (+ ${a.defenseBonus} DEF)")
+    val selectedSlot = state.selectedItem.flatMap {
+      case Left(e) => Some(e.slot)
+      case _       => None
+    }
+    val equipmentSubwindow = Window.empty
+      .printLine(
+        0,
+        0,
+        s"WEAPON: $weapon",
+        Pallete.white,
+        if (selectedSlot.contains(Slot.Weapon)) Pallete.gray else Pallete.black
+      )
+      .printLine(
+        0,
+        1,
+        s"ARMOR: $armor",
+        Pallete.white,
+        if (selectedSlot.contains(Slot.Armor)) Pallete.gray else Pallete.black
+      )
+
+    window
+      .pipe(
+        addPopup(
+          constants.popUpX,
+          0,
+          constants.popUpX + constants.popUpW,
+          constants.screenHeight - 5,
+          "Inventory",
+          itemSubwindow
+        )
+      )
+      .pipe(
+        addPopup(
+          constants.popUpX,
+          constants.screenHeight - 4,
+          constants.popUpX + constants.popUpW,
+          constants.screenHeight - 1,
+          "Equipment",
+          equipmentSubwindow
+        )
+      )
   }
 
   def toWindow(state: AppState, pointerPos: Option[PointerInput.Position]): Window = state match {

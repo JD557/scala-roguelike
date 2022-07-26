@@ -11,4 +11,5 @@ trait Entity {
   def name: String
   def sprite: Window.Sprite
   def isWalkable: Boolean
+  def setPosition(x: Int, y: Int): Entity
 }

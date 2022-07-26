@@ -9,6 +9,7 @@ import eu.joaocosta.roguelike.{Action, constants}
 
 sealed trait Npc extends Entity with Moveable.Component[Npc] with Fighter.Component[Npc] with Behavior.Component[Npc] {
   val isWalkable = false
+  def setPosition(x: Int, y: Int): Npc
 }
 
 object Npc {
@@ -21,6 +22,7 @@ object Npc {
     val name   = "Orc"
     val sprite = Window.Sprite('o', Pallete.darkGreen)
 
+    def setPosition(x: Int, y: Int): Orc             = copy(x = x, y = y)
     def move(dx: Int, dy: Int): Orc                  = copy(x = x + dx, y = y + dy)
     def updateFighter(f: Fighter => Fighter): Orc    = copy(fighter = f(fighter))
     def updateBehavior(f: Behavior => Behavior): Orc = copy(ai = f(ai))
@@ -34,6 +36,7 @@ object Npc {
     val name   = "Troll"
     val sprite = Window.Sprite('T', Pallete.green)
 
+    def setPosition(x: Int, y: Int): Troll             = copy(x = x, y = y)
     def move(dx: Int, dy: Int): Troll                  = copy(x = x + dx, y = y + dy)
     def updateFighter(f: Fighter => Fighter): Troll    = copy(fighter = f(fighter))
     def updateBehavior(f: Behavior => Behavior): Troll = copy(ai = f(ai))

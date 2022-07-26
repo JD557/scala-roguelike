@@ -6,6 +6,7 @@ import scala.util.Random
 import eu.joaocosta.roguelike.AppState._
 import eu.joaocosta.roguelike.constants._
 import eu.joaocosta.roguelike.entity._
+import eu.joaocosta.roguelike.entity.components.Equipable
 import eu.joaocosta.roguelike.entity.entities._
 
 sealed trait AppState {
@@ -166,23 +167,60 @@ object AppState {
         else applyActions(targets.distinct.map(target => Action.Heal(List(target), amount)))
       case Action.ChangeBehavior(target, f) =>
         mapState(_.updateEntity(target, target.updateBehavior(f)))
-
       case Action.UseItem(source, item) =>
         val updatedEntity = source.removeItem(item)
         if (source.inventory == updatedEntity.inventory) this
         else {
           val action = item.consumeResult(updatedEntity, gameState.entities)
-          mapState(
-            _.printLine(Message.UsedItem(updatedEntity, item)).updateEntity(source, updatedEntity)
+          val printMessage = action match {
+            case _: (Action.Equip | Action.Unequip) => false
+            case _                                  => true
+          }
+          mapState(st =>
+            if (printMessage) st.printLine(Message.UsedItem(updatedEntity, item)).updateEntity(source, updatedEntity)
+            else st.updateEntity(source, updatedEntity)
           ).applyAction(action)
         }
+      case Action.Equip(source, equipment) =>
+        source.fighter.equipment.get(equipment.slot) match {
+          case None =>
+            val updatedEntity = source.equip(equipment)
+            mapState(
+              _.printLine(Message.EquipedItem(updatedEntity, equipment)).updateEntity(source, updatedEntity)
+            )
+          case Some(oldEquipment) =>
+            val updatedEntity = source.unequip(equipment.slot).equip(equipment) match {
+              case e: InventoryEntity => e.addItem(oldEquipment)
+              case e                  => e
+            }
+            mapState(
+              _.printLine(Message.EquipedItem(updatedEntity, equipment)).updateEntity(source, updatedEntity)
+            )
+        }
+      case Action.Unequip(source, slot) =>
+        source.fighter.equipment.get(slot) match {
+          case None =>
+            applyAction(Action.NothingHappened)
+          case Some(oldEquipment) =>
+            source.unequip(oldEquipment.slot) match {
+              case updatedEntity: InventoryEntity =>
+                if (updatedEntity.inventory.isFull) this
+                else
+                  mapState(
+                    _.printLine(Message.UnequipedItem(updatedEntity, oldEquipment))
+                      .updateEntity(source, updatedEntity.addItem(oldEquipment))
+                  )
+              case updatedEntity => this
+            }
+        }
       case Action.DropItem(source, item) =>
-        val updatedEntity = source.removeItem(item)
+        val updatedEntity      = source.removeItem(item)
+        lazy val droppedEntity = item.setPosition(source.x, source.y)
         if (source.inventory != updatedEntity.inventory)
           mapState(
             _.printLine(Message.DroppedItem(source, item))
               .updateEntity(source, updatedEntity)
-              .addEntity(item.setPosition(source.x, source.y))
+              .addEntity(droppedEntity)
           )
         else this
 
@@ -243,11 +281,30 @@ object AppState {
   }
 
   case class InventoryView(currentState: GameState, cursor: Int = 0) extends AppState {
+    val maxCursor = currentState.player.inventory.items.size + currentState.player.fighter.equipment.size
+    lazy val selectedItem: Option[Either[Equipment, ConsumableEntity]] =
+      if (currentState.player.inventory.items.isEmpty && currentState.player.fighter.equipment.isEmpty) None
+      else if (cursor < currentState.player.inventory.items.size)
+        currentState.player.inventory.items.drop(cursor).headOption.map(e => Right(e))
+      else
+        (cursor - currentState.player.inventory.items.size) match {
+          case 0 =>
+            currentState.player.fighter.equipment
+              .get(Equipable.Slot.Weapon)
+              .orElse(
+                currentState.player.fighter.equipment.get(Equipable.Slot.Armor)
+              )
+              .map(e => Left(e))
+          case 1 =>
+            currentState.player.fighter.equipment.get(Equipable.Slot.Armor).map(e => Left(e))
+          case _ => None
+        }
+
     def applyAction(action: Action): AppState = action match {
       case Action.ReturnToGame => InGame(currentState)
       case Action.MoveCursor(_, dy) =>
         val nextCursor = cursor + dy
-        if (nextCursor < 0 || nextCursor >= currentState.player.inventory.items.size) this
+        if (nextCursor < 0 || nextCursor >= maxCursor) this
         else copy(cursor = nextCursor)
       case playerAction: Action.PlayerAction =>
         InGame(currentState).applyAction(playerAction)
@@ -265,8 +322,8 @@ object AppState {
         val newPlayer = currentState.player.updateFighter(fighter =>
           cursor match {
             case 0 => fighter.copy(hp = fighter.hp + constants.hpBonus, maxHp = fighter.maxHp + constants.hpBonus)
-            case 1 => fighter.copy(attack = fighter.attack + constants.attackBonus)
-            case 2 => fighter.copy(defense = fighter.defense + constants.defenseBonus)
+            case 1 => fighter.copy(baseAttack = fighter.baseAttack + constants.attackBonus)
+            case 2 => fighter.copy(baseDefense = fighter.baseDefense + constants.defenseBonus)
             case _ => fighter
           }
         )

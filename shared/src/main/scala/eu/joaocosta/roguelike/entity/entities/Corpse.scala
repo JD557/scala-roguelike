@@ -11,6 +11,7 @@ case class Corpse(of: Entity) extends Entity {
   val sprite     = Window.Sprite('%', Pallete.darkGray)
   val isWalkable = true
 
-  val x = of.x
-  val y = of.y
+  val x                                   = of.x
+  val y                                   = of.y
+  def setPosition(x: Int, y: Int): Corpse = Corpse(of.setPosition(x, y))
 }
