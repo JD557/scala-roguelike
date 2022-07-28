@@ -246,8 +246,9 @@ object AppStateRenderer extends ChainingSyntax {
     case Menu(cursor, message) =>
       val subwindow = Window.empty
         .printLine(0, 0, "New Game", Pallete.white, if (cursor == 0) Pallete.gray else Pallete.black)
-        .printLine(0, 1, "Load Game", Pallete.white, if (cursor == 1) Pallete.gray else Pallete.black)
-        .printLine(0, 2, "Quit Game", Pallete.white, if (cursor == 2) Pallete.gray else Pallete.black)
+        .printLine(0, 1, "Daily Challenge", Pallete.white, if (cursor == 1) Pallete.gray else Pallete.black)
+        .printLine(0, 2, "Load Game", Pallete.white, if (cursor == 2) Pallete.gray else Pallete.black)
+        .printLine(0, 3, "Quit Game", Pallete.white, if (cursor == 3) Pallete.gray else Pallete.black)
 
       val titleX   = (constants.screenWidth - constants.title.size) / 2
       val titleY   = constants.screenHeight / 2 - 4
@@ -255,9 +256,9 @@ object AppStateRenderer extends ChainingSyntax {
       Window.empty
         .printLine(titleX, titleY, constants.title, Pallete.red)
         .pipe(
-          addPopup(titleX, titleY + 1, titleX + constants.title.size - 1, titleY + 5, "", subwindow)
+          addPopup(titleX, titleY + 1, titleX + constants.title.size - 1, titleY + 6, "", subwindow)
         )
-        .printLine(messageX, titleY + 6, message.getOrElse(""), Pallete.white)
+        .printLine(messageX, titleY + 7, message.getOrElse(""), Pallete.white)
     case Pause(gameState, cursor) =>
       val subwindow = Window.empty
         .printLine(0, 0, "Continue", Pallete.white, if (cursor == 0) Pallete.gray else Pallete.black)

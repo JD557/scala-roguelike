@@ -8,6 +8,7 @@ import eu.joaocosta.roguelike.constants._
 import eu.joaocosta.roguelike.entity._
 import eu.joaocosta.roguelike.entity.components.Equipable
 import eu.joaocosta.roguelike.entity.entities._
+import eu.joaocosta.roguelike.random.SeededRandom
 
 sealed trait AppState {
   def applyAction(action: Action): AppState
@@ -23,15 +24,19 @@ object AppState {
         copy(cursor = math.min(math.max(0, cursor + dy), 2), message = None)
       case Action.Select =>
         cursor match {
-          case 0 => InGame(GameState.initialState.sample(random.rng)) // New game
-          case 1 => // Load Game
+          case 0 => InGame(GameState.initialState(SeededRandom(System.currentTimeMillis()))) // New game
+          case 1 =>
+            InGame(
+              GameState.initialState(SeededRandom(System.currentTimeMillis() / (1000 * 60 * 60 * 24)))
+            ) // New game (Daily Challenge)
+          case 2 => // Load Game
             savestate
               .loadGame(Resources.saveGame)
               .fold(
                 _ => copy(message = Some("Failed to load game")),
                 gameState => InGame(gameState)
               )
-          case 2 => Leaving // Quit Game
+          case 3 => Leaving // Quit Game
           case _ => this
         }
       case _ => this
@@ -106,9 +111,7 @@ object AppState {
       case Action.GoDown =>
         if ((gameState.player.x, gameState.player.y) == gameState.currentLevel.gameMap.downStairs) {
           mapState(
-            _.nextLevel(constants.levelGenerator)
-              .sample(random.rng)
-              .printLine(Message.GoDown)
+            _.nextLevel(constants.levelGenerator).printLine(Message.GoDown)
           )
         } else this
       case Action.PickUp =>
@@ -227,13 +230,13 @@ object AppState {
       case Action.NpcTurn =>
         gameState.currentLevel.npcs.foldLeft(this: AppState) {
           case (inGame: InGame, npc) =>
-            val (nextBehavior, nextAction) =
-              npc.ai.next(inGame.gameState.player, inGame.gameState.currentLevel).sample(random.rng)
+            val (newRng, (nextBehavior, nextAction)) =
+              npc.ai.next(inGame.gameState.player, inGame.gameState.currentLevel).sample(gameState.rng)
             val newNpc =
               if (nextBehavior != npc.ai) npc.updateBehavior(_ => nextBehavior)
               else npc
             inGame
-              .mapState(_.updateEntity(npc, newNpc))
+              .mapState(_.updateEntity(npc, newNpc).copy(rng = newRng))
               .applyAction(nextAction(newNpc))
           case (st, _) =>
             st
