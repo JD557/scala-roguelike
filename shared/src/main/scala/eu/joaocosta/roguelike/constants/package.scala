@@ -25,40 +25,41 @@ package object constants {
       case _                  => 5
     },
     monsterDistribution = {
-      case floor if floor < 3 => Distribution.weighted(80 -> (Npc.Orc(_, _)))
-      case floor if floor < 5 => Distribution.weighted(80 -> (Npc.Orc(_, _)), 15 -> (Npc.Troll(_, _)))
-      case floor if floor < 7 => Distribution.weighted(80 -> (Npc.Orc(_, _)), 30 -> (Npc.Troll(_, _)))
-      case _                  => Distribution.weighted(80 -> (Npc.Orc(_, _)), 60 -> (Npc.Troll(_, _)))
+      case floor if floor < 3 => Distribution.weighted(80 -> Npc.Orc)
+      case floor if floor < 5 => Distribution.weighted(80 -> Npc.Orc, 15 -> Npc.Troll)
+      case floor if floor < 7 => Distribution.weighted(80 -> Npc.Orc, 30 -> Npc.Troll)
+      case _                  => Distribution.weighted(80 -> Npc.Orc, 60 -> Npc.Troll)
     },
     maxItems = {
       case floor if floor < 4 => 1
       case _                  => 2
     },
     itemDistribution = {
-      case floor if floor < 2 => Distribution.weighted(35 -> (Item.HealingPotion(_, _)))
+      case floor if floor < 2 => Distribution.weighted(35 -> Item.HealingPotion)
       case floor if floor < 4 =>
         Distribution.weighted(
-          35 -> (Item.HealingPotion(_, _)),
-          10 -> (Item.ConfusionScroll(_, _)),
-          5  -> (Equipment.Dagger(_, _)),
-          5  -> (Equipment.LeatherArmor(_, _))
+          35 -> Item.HealingPotion,
+          10 -> Item.ConfusionScroll,
+          5  -> Equipment.Dagger,
+          5  -> Equipment.LeatherArmor
         )
       case floor if floor < 6 =>
         Distribution.weighted(
-          35 -> (Item.HealingPotion(_, _)),
-          10 -> (Item.ConfusionScroll(_, _)),
-          25 -> (Item.LightningScroll(_, _)),
-          5  -> (Equipment.Sword(_, _)),
-          5  -> (Equipment.LeatherArmor(_, _))
+          35 -> Item.HealingPotion,
+          10 -> Item.ConfusionScroll,
+          25 -> Item.LightningScroll,
+          5  -> Equipment.Sword,
+          5  -> Equipment.LeatherArmor
         )
       case _ =>
         Distribution.weighted(
-          35 -> (Item.HealingPotion(_, _)),
-          10 -> (Item.ConfusionScroll(_, _)),
-          25 -> (Item.LightningScroll(_, _)),
-          25 -> (Item.FireballScroll(_, _)),
-          25 -> (Item.LightningScroll(_, _)),
-          15 -> (Equipment.ChainMail(_, _))
+          35 -> Item.HealingPotion,
+          10 -> Item.ConfusionScroll,
+          25 -> Item.LightningScroll,
+          25 -> Item.FireballScroll,
+          25 -> Item.LightningScroll,
+          15 -> Equipment.Sword,
+          15 -> Equipment.ChainMail
         )
     }
   )

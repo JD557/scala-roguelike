@@ -13,3 +13,7 @@ trait Entity {
   def isWalkable: Boolean
   def setPosition(x: Int, y: Int): Entity
 }
+
+object Entity {
+  type Builder[E <: Entity] = Function2[Int, Int, E]
+}

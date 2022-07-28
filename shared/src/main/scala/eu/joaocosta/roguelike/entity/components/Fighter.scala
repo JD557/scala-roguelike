@@ -8,7 +8,6 @@ case class Fighter(
     maxHp: Int,
     baseAttack: Int,
     baseDefense: Int,
-    attackVerb: String,
     expGiven: Int = 0,
     equipment: Map[Equipable.Slot, Equipment] = Map.empty
 ) {
@@ -17,6 +16,8 @@ case class Fighter(
   val defenseBonus = equipment.values.map(_.defenseBonus).sum
   val attack       = baseAttack + attackBonus
   val defense      = baseDefense + defenseBonus
+  val attackVerb =
+    equipment.values.collectFirst { case weapon: Equipment.Weapon => weapon.attackVerb }.getOrElse("attacked")
 
   val isDead: Boolean = hp <= 0
   def computeDamage(that: Fighter): Int =

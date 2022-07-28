@@ -4,6 +4,7 @@ import io.circe._
 import io.circe.generic.semiauto._
 import io.circe.syntax._
 
+import eu.joaocosta.minart.graphics.Color
 import eu.joaocosta.roguelike._
 import eu.joaocosta.roguelike.constants.Message
 import eu.joaocosta.roguelike.entity._
@@ -11,6 +12,11 @@ import eu.joaocosta.roguelike.entity.components._
 import eu.joaocosta.roguelike.entity.entities._
 
 object Codecs {
+  implicit lazy val colorCodec: Codec[Color] = Codec.from(
+    Decoder[Int].map(Color.fromRGB),
+    Encoder[Int].contramap(_.argb)
+  )
+
   implicit lazy val fighterCodec: Codec[Fighter]     = deriveCodec
   implicit lazy val behaviorCodec: Codec[Behavior]   = deriveCodec
   implicit lazy val equipmentCodec: Codec[Equipment] = deriveCodec

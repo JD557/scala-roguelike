@@ -11,8 +11,7 @@ final case class Player(
     x: Int,
     y: Int,
     exp: Int = 0,
-    fighter: Fighter =
-      Fighter(constants.baseHp, constants.baseHp, constants.baseAttack, constants.baseDefense, "kicked"),
+    fighter: Fighter = Fighter(constants.baseHp, constants.baseHp, constants.baseAttack, constants.baseDefense),
     inventory: Inventory = Inventory(Nil, 26)
 ) extends Entity
     with Moveable.Component[Player]

@@ -6,7 +6,7 @@ import eu.joaocosta.roguelike.constants.Pallete
 import eu.joaocosta.roguelike.entity._
 import eu.joaocosta.roguelike.rendering.Window
 
-case class Corpse(of: Entity) extends Entity {
+final case class Corpse(of: Entity) extends Entity {
   val name       = s"${of.name} corpse"
   val sprite     = Window.Sprite('%', Pallete.darkGray)
   val isWalkable = true
