@@ -20,7 +20,7 @@ case class GameState(
     GameState(
       newLevel,
       newPlayer,
-      newLevel.gameMap.visibleFrom(newPlayer.x, newPlayer.y, constants.playerVision),
+      Set.empty,
       messages,
       nextRng
     )
@@ -62,7 +62,7 @@ object GameState {
     GameState(
       currentLevel = initialLevel,
       player = initialPlayer,
-      exploredTiles = initialLevel.gameMap.visibleFrom(initialPlayer.x, initialPlayer.y, constants.playerVision),
+      exploredTiles = Set.empty,
       messages = List(Message.Welcome),
       rng = nextRng
     )

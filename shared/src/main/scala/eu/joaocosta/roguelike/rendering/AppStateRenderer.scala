@@ -40,7 +40,7 @@ object AppStateRenderer extends ChainingSyntax {
   }
 
   private def putGameTiles(state: GameState)(window: Window): Window = {
-    val tileMap = state.exploredTiles.iterator.map { case pos =>
+    val tileMap = (state.exploredTiles ++ state.visibleTiles).iterator.map { case pos =>
       if (state.visibleTiles(pos)) pos -> state.currentLevel.gameMap.tiles(pos).sprite
       else pos                         -> state.currentLevel.gameMap.tiles(pos).darkSprite
     }
