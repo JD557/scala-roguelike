@@ -21,6 +21,7 @@ object Main extends MinartApp {
   val initialState  = AppState.initialState
   val frameRate     = LoopFrequency.Uncapped
   val terminateWhen = (state: AppState) => state == Leaving
+
   val renderFrame = (appState: AppState) =>
     for {
       _       <- CanvasIO.redraw

@@ -61,7 +61,7 @@ object GameState {
     GameState(
       currentLevel = initialLevel,
       player = initialPlayer,
-      exploredTiles = Set(),
+      exploredTiles = initialLevel.gameMap.visibleFrom(initialPlayer.x, initialPlayer.y, constants.playerVision),
       messages = List(Message.Welcome),
       rng = nextRng
     )

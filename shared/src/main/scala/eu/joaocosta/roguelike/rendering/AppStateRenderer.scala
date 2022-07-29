@@ -40,22 +40,19 @@ object AppStateRenderer extends ChainingSyntax {
   }
 
   private def putGameTiles(state: GameState)(window: Window): Window = {
-    def tileSprite(pos: (Int, Int), tile: GameMap.Tile): Option[Window.Sprite] =
-      if (state.visibleTiles(pos)) Some(tile.sprite)
-      else if (state.exploredTiles(pos)) Some(tile.darkSprite)
-      else None
-    val tileMap = state.currentLevel.gameMap.tiles.flatMap { case (pos, tile) =>
-      tileSprite(pos, tile).map(s => pos -> s)
-    }.toMap
-    val entitySprites = state.entities.iterator
+    val tileMap = state.exploredTiles.iterator.map { case pos =>
+      if (state.visibleTiles(pos)) pos -> state.currentLevel.gameMap.tiles(pos).sprite
+      else pos                         -> state.currentLevel.gameMap.tiles(pos).darkSprite
+    }
+    val (walkableEntities, nonWalkableEntities) = state.entities.iterator
       .filter(e => state.visibleTiles(e.x, e.y))
-      .flatMap(e => tileMap.get(e.x, e.y).map(t => e -> t))
-      .toList
-      .sortBy(!_._1.isWalkable)
-      .map { case (entity, tile) =>
-        (entity.x, entity.y) -> entity.sprite.copy(bg = tile.bg)
-      }
-    window.addTiles(tileMap).addTiles(entitySprites)
+      .flatMap(e =>
+        state.currentLevel.gameMap.tiles
+          .get((e.x, e.y))
+          .map(tile => e.isWalkable -> ((e.x, e.y) -> e.sprite.copy(bg = tile.sprite.bg)))
+      )
+      .partition(_._1)
+    window.addTiles((tileMap ++ walkableEntities.map(_._2) ++ nonWalkableEntities.map(_._2)).toIterable)
   }
 
   private def wrapText(str: String, lineWidth: Int): List[String] = {
