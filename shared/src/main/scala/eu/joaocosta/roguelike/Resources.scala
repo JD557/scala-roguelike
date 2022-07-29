@@ -6,7 +6,7 @@ import eu.joaocosta.minart.graphics.image._
 import eu.joaocosta.minart.runtime._
 
 object Resources {
-  // Gloop Font by Polyduck from https://www.gridsagegames.com/rexpaint/resources.html
+  // Gloop Font by Polyducks from https://www.gridsagegames.com/rexpaint/resources.html
   val font = SpriteSheet(Image.loadBmpImage(Resource("gloop.bmp")).get, constants.spriteWidth, constants.spriteHeight)
 
   // Font extended with Kenney Sprites
