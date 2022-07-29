@@ -182,13 +182,15 @@ object AppStateRenderer extends ChainingSyntax {
   ): Window = {
     val itemSubwindow = state.currentState.player.inventory.items.zipWithIndex
       .foldLeft(Window.empty) { case (window, (item, idx)) =>
-        window.printLine(
-          0,
-          idx + 1,
-          item.name,
-          Pallete.white,
-          if (state.cursor == idx) Pallete.gray else Pallete.black
-        )
+        window
+          .addTile((0, idx + 1), item.sprite.copy(bg = Pallete.black))
+          .printLine(
+            1,
+            idx + 1,
+            item.name,
+            Pallete.white,
+            if (state.cursor == idx) Pallete.gray else Pallete.black
+          )
       }
     val weapon = state.currentState.player.fighter.equipment
       .get(Slot.Weapon)

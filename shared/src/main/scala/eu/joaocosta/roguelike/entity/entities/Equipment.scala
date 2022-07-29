@@ -28,27 +28,27 @@ object Equipment {
 
   val Dagger = Weapon.Builder(
     name = "Dagger",
-    sprite = Window.Sprite('/', Pallete.yellow),
+    sprite = Window.Sprite('\\', Pallete.yellow),
     attackBonus = 2,
     attackVerb = "stabbed"
   )
 
   val Sword = Weapon.Builder(
     name = "Sword",
-    sprite = Window.Sprite('/', Pallete.orange),
+    sprite = Window.Sprite('\\', Pallete.orange),
     attackBonus = 4,
     attackVerb = "sliced"
   )
 
   val LeatherArmor = Armor.Builder(
     name = "Leather Armor",
-    sprite = Window.Sprite('[', Pallete.orange),
+    sprite = Window.Sprite(']', Pallete.orange),
     defenseBonus = 1
   )
 
   val ChainMail = Armor.Builder(
     name = "Chain Mail",
-    sprite = Window.Sprite('[', Pallete.orange),
+    sprite = Window.Sprite(']', Pallete.orange),
     defenseBonus = 3
   )
 

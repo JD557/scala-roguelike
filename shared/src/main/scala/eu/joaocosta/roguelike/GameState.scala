@@ -16,10 +16,11 @@ case class GameState(
 
   def nextLevel(generator: LevelGenerator): GameState = {
     val (nextRng, newLevel) = currentLevel.nextLevel(generator).sample(rng)
+    val newPlayer           = player.copy(x = newLevel.gameMap.upStairs._1, y = newLevel.gameMap.upStairs._2)
     GameState(
       newLevel,
-      player.copy(x = newLevel.gameMap.upStairs._1, y = newLevel.gameMap.upStairs._2),
-      Set.empty,
+      newPlayer,
+      newLevel.gameMap.visibleFrom(newPlayer.x, newPlayer.y, constants.playerVision),
       messages,
       nextRng
     )
