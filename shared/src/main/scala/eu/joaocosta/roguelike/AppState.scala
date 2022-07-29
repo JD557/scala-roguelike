@@ -21,7 +21,7 @@ object AppState {
   case class Menu(cursor: Int, message: Option[String] = None) extends AppState {
     def applyAction(action: Action): AppState = action match {
       case Action.MoveCursor(_, dy) =>
-        copy(cursor = math.min(math.max(0, cursor + dy), 2), message = None)
+        copy(cursor = math.min(math.max(0, cursor + dy), 3), message = None)
       case Action.Select =>
         cursor match {
           case 0 => InGame(GameState.initialState(SeededRandom(System.currentTimeMillis()))) // New game
