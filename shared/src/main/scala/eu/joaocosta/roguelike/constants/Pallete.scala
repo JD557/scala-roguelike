@@ -1,6 +1,6 @@
 package eu.joaocosta.roguelike.constants
 
-import eu.joaocosta.minart.graphics._
+import eu.joaocosta.minart.graphics.Color
 
 object Pallete { // From http://androidarts.com/palette/16pal.htm
   val black      = Color(0, 0, 0)

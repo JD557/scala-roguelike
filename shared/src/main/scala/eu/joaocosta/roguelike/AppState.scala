@@ -1,8 +1,5 @@
 package eu.joaocosta.roguelike
 
-import scala.collection.immutable.LazyList.cons
-import scala.util.Random
-
 import eu.joaocosta.roguelike.AppState._
 import eu.joaocosta.roguelike.constants._
 import eu.joaocosta.roguelike.entity._
@@ -12,7 +9,7 @@ import eu.joaocosta.roguelike.random.SeededRandom
 
 sealed trait AppState {
   def applyAction(action: Action): AppState
-  def applyActions(actions: IterableOnce[Action]): AppState = actions.foldLeft(this)((st, a) => st.applyAction(a))
+  def applyActions(actions: Iterable[Action]): AppState = actions.foldLeft(this)((st, a) => st.applyAction(a))
 }
 
 object AppState {

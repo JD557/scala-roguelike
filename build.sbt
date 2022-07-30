@@ -12,6 +12,13 @@ ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 ThisBuild / scalafixOnCompile := true
 
+ThisBuild / scalacOptions ++= Seq(
+  "-deprecation",
+  "-feature",
+  "-language:higherKinds",
+  "-unchecked"
+)
+
 lazy val root =
   crossProject(JVMPlatform, JSPlatform, NativePlatform)
     .in(file("."))

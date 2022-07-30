@@ -1,7 +1,5 @@
 package eu.joaocosta.roguelike.generator
 
-import scala.annotation.tailrec
-
 import eu.joaocosta.roguelike._
 import eu.joaocosta.roguelike.entity._
 import eu.joaocosta.roguelike.entity.entities._

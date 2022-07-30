@@ -1,12 +1,12 @@
 package eu.joaocosta.roguelike.entity.entities
 
 import eu.joaocosta.minart.graphics._
+import eu.joaocosta.roguelike.constants
 import eu.joaocosta.roguelike.constants.Pallete
 import eu.joaocosta.roguelike.entity._
 import eu.joaocosta.roguelike.entity.components.Equipable.Slot
 import eu.joaocosta.roguelike.entity.components._
 import eu.joaocosta.roguelike.rendering.Window
-import eu.joaocosta.roguelike.{Action, constants}
 
 final case class Npc(x: Int, y: Int, name: String, sprite: Window.Sprite, fighter: Fighter, ai: Behavior)
     extends Entity

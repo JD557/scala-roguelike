@@ -8,11 +8,11 @@ import eu.joaocosta.minart.graphics.image._
 import eu.joaocosta.minart.graphics.pure._
 import eu.joaocosta.minart.input._
 import eu.joaocosta.roguelike.AppState._
+import eu.joaocosta.roguelike._
 import eu.joaocosta.roguelike.constants.Pallete
 import eu.joaocosta.roguelike.entity._
 import eu.joaocosta.roguelike.entity.components.Equipable.Slot
 import eu.joaocosta.roguelike.entity.entities.Player
-import eu.joaocosta.roguelike.{AppState, GameMap, GameState, constants}
 
 object AppStateRenderer extends ChainingSyntax {
 
@@ -52,7 +52,7 @@ object AppStateRenderer extends ChainingSyntax {
           .map(tile => e.isWalkable -> ((e.x, e.y) -> e.sprite.copy(bg = tile.sprite.bg)))
       )
       .partition(_._1)
-    window.addTiles((tileMap ++ walkableEntities.map(_._2) ++ nonWalkableEntities.map(_._2)).toIterable)
+    window.addTiles((tileMap ++ walkableEntities.map(_._2) ++ nonWalkableEntities.map(_._2)).to(Iterable))
   }
 
   private def wrapText(str: String, lineWidth: Int): List[String] = {

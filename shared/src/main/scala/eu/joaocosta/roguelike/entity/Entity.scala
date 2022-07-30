@@ -1,7 +1,6 @@
 package eu.joaocosta.roguelike.entity
 
 import eu.joaocosta.minart.graphics._
-import eu.joaocosta.roguelike.Action
 import eu.joaocosta.roguelike.rendering.Window
 
 trait Entity {

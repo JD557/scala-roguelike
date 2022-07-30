@@ -1,6 +1,5 @@
 package eu.joaocosta.roguelike
 
-import eu.joaocosta.roguelike.entity.entities.Item.FireballScroll
 import eu.joaocosta.roguelike.entity.entities.{Equipment, Item, Npc}
 import eu.joaocosta.roguelike.random.Distribution
 

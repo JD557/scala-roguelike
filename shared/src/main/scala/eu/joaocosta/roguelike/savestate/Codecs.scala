@@ -45,7 +45,7 @@ object Codecs {
             case "item"      => itemCodec.decodeJson(entityJson).left.map(_.message)
             case "npc"       => npcCodec.decodeJson(entityJson).left.map(_.message)
             case "player"    => playerCodec.decodeJson(entityJson).left.map(_.message)
-            case t           => Left("Unsupported entity: " + t)
+            case t           => Left(s"Unsupported entity: $t")
           }
         }
       }
@@ -57,13 +57,13 @@ object Codecs {
       case item: Item           => JsonObject("type" := "item", "entity" := item).asJson
       case npc: Npc             => JsonObject("type" := "npc", "entity" := npc).asJson
       case player: Player       => JsonObject("type" := "player", "entity" := player).asJson
-      case e                    => throw RuntimeException("Unsuported entity: " + e)
+      case e                    => throw RuntimeException(s"Unsuported entity:  $e")
     }
 
     Codec.from(decoder, encoder)
   }
   implicit lazy val coordinatesKeyEncoder: KeyEncoder[(Int, Int)] =
-    KeyEncoder.instance { case (x, y) => x + "," + y }
+    KeyEncoder.instance { case (x, y) => s"$x,$y" }
   implicit lazy val coordinatesKeyDecoder: KeyDecoder[(Int, Int)] =
     KeyDecoder.instance(str =>
       str.split(",").flatMap(_.toIntOption).toList match {

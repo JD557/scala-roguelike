@@ -1,7 +1,6 @@
 package eu.joaocosta.roguelike.entity.entities
 
 import eu.joaocosta.minart.graphics._
-import eu.joaocosta.roguelike.Action
 import eu.joaocosta.roguelike.constants.Pallete
 import eu.joaocosta.roguelike.entity._
 import eu.joaocosta.roguelike.rendering.Window
