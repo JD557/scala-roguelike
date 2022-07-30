@@ -70,20 +70,19 @@ object Action {
     )
   )
 
-  def getActions(state: AppState, keyboard: KeyboardInput): Option[Action] = {
-    keyboard.keysPressed.headOption.flatMap {
-      key => // Assume a single key is pressed. It's safer than to switch key order
-        state match {
-          case _: AppState.Menu           => menuActions.get(key)
-          case _: AppState.Pause          => menuActions.get(key)
-          case _: AppState.InGame         => inGameActions.get(key)
-          case _: AppState.LookAround     => menuActions.get(key)
-          case _: AppState.HistoryView    => menuActions.get(key)
-          case _: AppState.LevelUp        => menuActions.get(key)
-          case st: AppState.InventoryView => inventoryViewActions(st.selectedItem).get(key)
-          case _: AppState.GameOver       => menuActions.get(key)
-          case _                          => None
-        }
+  def getActions(state: AppState, keysPressed: Set[KeyboardInput.Key]): Option[Action] = {
+    keysPressed.headOption.flatMap { key => // Assume a single key is pressed. It's safer than to switch key order
+      state match {
+        case _: AppState.Menu           => menuActions.get(key)
+        case _: AppState.Pause          => menuActions.get(key)
+        case _: AppState.InGame         => inGameActions.get(key)
+        case _: AppState.LookAround     => menuActions.get(key)
+        case _: AppState.HistoryView    => menuActions.get(key)
+        case _: AppState.LevelUp        => menuActions.get(key)
+        case st: AppState.InventoryView => inventoryViewActions(st.selectedItem).get(key)
+        case _: AppState.GameOver       => menuActions.get(key)
+        case _                          => None
+      }
     }
   }
 }

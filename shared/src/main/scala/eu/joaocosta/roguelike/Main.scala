@@ -9,7 +9,8 @@ import eu.joaocosta.roguelike.AppState._
 import eu.joaocosta.roguelike.rendering.AppStateRenderer
 
 object Main extends MinartApp {
-  type State = AppState
+
+  type State = (AppState, Input)
   val loopRunner = LoopRunner()
   val canvasSettings = Canvas.Settings(
     width = constants.screenWidth * constants.spriteWidth,
@@ -18,18 +19,19 @@ object Main extends MinartApp {
     clearColor = constants.Pallete.black
   )
   val canvasManager = CanvasManager()
-  val initialState  = AppState.initialState
-  val frameRate     = LoopFrequency.Uncapped
-  val terminateWhen = (state: AppState) => state == Leaving
+  val initialState  = (AppState.initialState, Input())
+  val frameRate     = LoopFrequency.hz60
+  val terminateWhen = (state: State) => state._1 == Leaving
 
-  val renderFrame = (appState: AppState) =>
+  val renderFrame = { case (appState, input) =>
     for {
-      _       <- CanvasIO.redraw
-      input   <- CanvasIO.getKeyboardInput
-      pointer <- CanvasIO.getPointerInput
-      _       <- CanvasIO.clear()
-      _       <- AppStateRenderer.render(appState, Resources.richFont, pointer)
-      actions   = Action.getActions(appState, input)
-      nextState = appState.applyActions(actions)
+      _        <- CanvasIO.redraw
+      newInput <- CanvasIO.getKeyboardInput.map(input.update)
+      pointer  <- CanvasIO.getPointerInput
+      _        <- CanvasIO.clear()
+      _        <- AppStateRenderer.render(appState, Resources.richFont, pointer)
+      actions   = Action.getActions(appState, input.keyPresses)
+      nextState = (appState.applyActions(actions), newInput)
     } yield nextState
+  }
 }
