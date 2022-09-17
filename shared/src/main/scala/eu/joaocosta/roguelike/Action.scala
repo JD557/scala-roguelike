@@ -9,6 +9,7 @@ enum Action {
   case PauseGame
   case ReturnToGame
   case LookAround(action: List[Entity] => Action, radius: Int = 0)
+  case ViewHelp
   case ViewHistory
   case ViewInventory
   case Wait
@@ -53,6 +54,7 @@ object Action {
 
   val inGameActions: ActionList = playerMovementActions ++ Map(
     KeyboardInput.Key.Escape -> PauseGame,
+    KeyboardInput.Key.H      -> ViewHelp,
     KeyboardInput.Key.L      -> LookAround(_ => ReturnToGame),
     KeyboardInput.Key.V      -> ViewHistory,
     KeyboardInput.Key.I      -> ViewInventory,
@@ -75,6 +77,7 @@ object Action {
       state match {
         case _: AppState.Menu           => menuActions.get(key)
         case _: AppState.Pause          => menuActions.get(key)
+        case _: AppState.Help           => menuActions.get(key)
         case _: AppState.InGame         => inGameActions.get(key)
         case _: AppState.LookAround     => menuActions.get(key)
         case _: AppState.HistoryView    => menuActions.get(key)

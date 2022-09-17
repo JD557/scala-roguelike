@@ -60,6 +60,14 @@ object AppState {
     }
   }
 
+  case class Help(gameState: GameState) extends AppState {
+    def applyAction(action: Action): AppState = action match {
+      case Action.ReturnToGame =>
+        InGame(gameState)
+      case _ => this
+    }
+  }
+
   case class InGame(gameState: GameState) extends AppState {
 
     def mapState(f: GameState => GameState) =
@@ -67,6 +75,7 @@ object AppState {
 
     def applyAction(action: Action): AppState = action match {
       case Action.PauseGame => Pause(gameState, 0)
+      case Action.ViewHelp  => Help(gameState)
       case Action.LookAround(triggerAction, radius) =>
         LookAround(gameState, gameState.player.x, gameState.player.y, triggerAction, radius)
       case Action.ViewHistory   => HistoryView(gameState)
