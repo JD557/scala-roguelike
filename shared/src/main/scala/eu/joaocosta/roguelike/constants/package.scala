@@ -13,7 +13,7 @@ package object constants {
   val spriteHeight = 8
 
   val keyFirstRepeat = 25
-  val keyNextRepeat  = 10
+  val keyNextRepeat  = 7
 
   val levelGenerator = generator.DefaultLevelGenerator(
     width = screenWidth,
