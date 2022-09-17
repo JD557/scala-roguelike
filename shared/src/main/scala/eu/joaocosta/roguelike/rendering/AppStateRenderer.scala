@@ -159,6 +159,11 @@ object AppStateRenderer extends ChainingSyntax {
       )
       .printLine(
         constants.rightStatusX,
+        constants.statusY + 4,
+        " F: Fullscreen"
+      )
+      .printLine(
+        constants.rightStatusX,
         constants.statusY + 5,
         if (showHelp) " H: Show help" else ""
       )
