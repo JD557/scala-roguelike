@@ -92,7 +92,7 @@ object AppStateRenderer extends ChainingSyntax {
     )(window)
   }
 
-  private def putPlayerStatus(state: GameState)(window: Window): Window = {
+  private def putPlayerStatus(state: GameState, showHelp: Boolean = false)(window: Window): Window = {
     def drawBar(text: String, filled: Int, total: Int, barSize: Int, filledColor: Color, emptyColor: Color): Window = {
       val filledTiles = (barSize * filled) / total
       val freeTiles   = barSize - filledTiles
@@ -157,6 +157,16 @@ object AppStateRenderer extends ChainingSyntax {
         constants.statusY + 2,
         s" FLOOR: ${state.currentLevel.floor}"
       )
+      .printLine(
+        constants.rightStatusX,
+        constants.statusY + 4,
+        " F: Fullscreen"
+      )
+      .printLine(
+        constants.rightStatusX,
+        constants.statusY + 5,
+        if (showHelp) " H: Show help" else ""
+      )
   }
 
   private def printSelectedEntities(state: GameState, cursorPos: Option[(Int, Int, Int)])(
@@ -194,10 +204,10 @@ object AppStateRenderer extends ChainingSyntax {
       }
     val weapon = state.currentState.player.fighter.equipment
       .get(Slot.Weapon)
-      .fold("(NONE)")(w => s"${w.name} (+ ${w.attackBonus} ATK)")
+      .fold("(NONE)")(w => s"${w.sprite.char}${w.name} (+ ${w.attackBonus} ATK)")
     val armor = state.currentState.player.fighter.equipment
       .get(Slot.Armor)
-      .fold("(NONE)")(a => s"${a.name} (+ ${a.defenseBonus} DEF)")
+      .fold("(NONE)")(a => s"${a.sprite.char}${a.name} (+ ${a.defenseBonus} DEF)")
     val selectedSlot = state.selectedItem.flatMap {
       case Left(e) => Some(e.slot)
       case _       => None
@@ -241,6 +251,63 @@ object AppStateRenderer extends ChainingSyntax {
       )
   }
 
+  private def printHelp(window: Window): Window = {
+    val helpSubwindow =
+      Window.empty
+        .printLine(0, 0, s"""Welcome to "${constants.title}"""")
+        .printLine(0, 2, "Explore the dungeon.")
+        .printLine(0, 3, "Find loot.")
+        .printLine(0, 4, "Beware of dangerous monsters.")
+        .printLine(0, 5, "See how far down you can get!")
+        .printLine(0, 7, "Press H to go back to the game.")
+    val controlsSubwindow =
+      Window.empty
+        .printLine(0, 0, "In game:", Pallete.blue)
+        .printLine(0, 1, "Arrows: Move/Attack")
+        .printLine(0, 2, "Space: Wait")
+        .printLine(0, 3, "G: Pick up item")
+        .printLine(0, 4, "D: Go downstairs")
+        .printLine(0, 5, "L: Look around")
+        .printLine(0, 6, "I: View inventory")
+        .printLine(0, 7, "I: View Log history")
+        .printLine(0, 8, "Esc: Pause")
+        .printLine(0, 9, "H: View help")
+        .printLine(0, 11, "Look Around/Targeting:", Pallete.blue)
+        .printLine(0, 12, "Arrows: Move Cursor")
+        .printLine(0, 13, "Enter: Choose Target")
+        .printLine(0, 14, "Esc: Go Back")
+        .printLine(0, 16, "Inventory:", Pallete.blue)
+        .printLine(0, 17, "Arrows: Move Cursor")
+        .printLine(0, 18, "Enter: Use/Equip/Unequip")
+        .printLine(0, 19, "Backspace: Drop")
+        .printLine(0, 20, "Esc: Go Back")
+        .printLine(0, 22, "Log History:", Pallete.blue)
+        .printLine(0, 23, "Arrows: Scroll")
+        .printLine(0, 24, "Esc: Go Back")
+
+    window
+      .pipe(
+        addPopup(
+          0,
+          0,
+          (constants.screenWidth / 2) - 1,
+          constants.statusY - 2,
+          "Help",
+          helpSubwindow
+        )
+      )
+      .pipe(
+        addPopup(
+          (constants.screenWidth / 2),
+          0,
+          constants.screenWidth - 1,
+          constants.statusY - 2,
+          "Controls",
+          controlsSubwindow
+        )
+      )
+  }
+
   def toWindow(state: AppState, pointerPos: Option[PointerInput.Position]): Window = state match {
     case Menu(cursor, message) =>
       val subwindow = Window.empty
@@ -258,6 +325,11 @@ object AppStateRenderer extends ChainingSyntax {
           addPopup(titleX, titleY + 1, titleX + constants.title.size - 1, titleY + 6, "", subwindow)
         )
         .printLine(messageX, titleY + 7, message.getOrElse(""), Pallete.white)
+    case Help(gameState) =>
+      Window.empty
+        .pipe(printHelp)
+        .pipe(putGameMessages(gameState, constants.maxMessages, 0))
+        .pipe(putPlayerStatus(gameState))
     case Pause(gameState, cursor) =>
       val subwindow = Window.empty
         .printLine(0, 0, "Continue", Pallete.white, if (cursor == 0) Pallete.gray else Pallete.black)
@@ -282,7 +354,7 @@ object AppStateRenderer extends ChainingSyntax {
         .pipe(putGameTiles(inGame.gameState))
         .pipe(printSelectedEntities(inGame.gameState, cursorPos))
         .pipe(putGameMessages(inGame.gameState, constants.maxMessages, 0))
-        .pipe(putPlayerStatus(inGame.gameState))
+        .pipe(putPlayerStatus(inGame.gameState, showHelp = true))
     case gameOver: GameOver =>
       val cursorPos = pointerPos.map(pos => (pos.x / constants.spriteWidth, pos.y / constants.spriteHeight, 0))
       Window.empty

@@ -28,21 +28,21 @@ object Equipment {
 
   val Dagger = Weapon.Builder(
     name = "Dagger",
-    sprite = Window.Sprite('\\', Pallete.yellow),
+    sprite = Window.Sprite('\\', Pallete.orange),
     attackBonus = 2,
     attackVerb = "stabbed"
   )
 
   val Sword = Weapon.Builder(
     name = "Sword",
-    sprite = Window.Sprite('\\', Pallete.orange),
-    attackBonus = 4,
+    sprite = Window.Sprite('\\', Pallete.yellow),
+    attackBonus = 5,
     attackVerb = "sliced"
   )
 
   val LeatherArmor = Armor.Builder(
     name = "Leather Armor",
-    sprite = Window.Sprite(']', Pallete.orange),
+    sprite = Window.Sprite(']', Pallete.brown),
     defenseBonus = 1
   )
 
@@ -50,6 +50,12 @@ object Equipment {
     name = "Chain Mail",
     sprite = Window.Sprite(']', Pallete.orange),
     defenseBonus = 3
+  )
+
+  val PlateArmor = Armor.Builder(
+    name = "Plate Armor",
+    sprite = Window.Sprite(']', Pallete.yellow),
+    defenseBonus = 5
   )
 
   final case class Weapon(x: Int, y: Int, name: String, sprite: Window.Sprite, attackBonus: Int, attackVerb: String)

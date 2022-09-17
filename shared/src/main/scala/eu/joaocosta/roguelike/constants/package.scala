@@ -13,7 +13,7 @@ package object constants {
   val spriteHeight = 8
 
   val keyFirstRepeat = 25
-  val keyNextRepeat  = 10
+  val keyNextRepeat  = 7
 
   val levelGenerator = generator.DefaultLevelGenerator(
     width = screenWidth,
@@ -27,41 +27,67 @@ package object constants {
       case _                  => 5
     },
     monsterDistribution = {
-      case floor if floor < 3 => Distribution.weighted(80 -> Npc.Orc)
-      case floor if floor < 5 => Distribution.weighted(80 -> Npc.Orc, 15 -> Npc.Troll)
-      case floor if floor < 7 => Distribution.weighted(80 -> Npc.Orc, 30 -> Npc.Troll)
-      case _                  => Distribution.weighted(80 -> Npc.Orc, 60 -> Npc.Troll)
+      case floor if floor < 2  => Distribution.weighted(40 -> Npc.Spider, 40 -> Npc.Bat, 20 -> Npc.Goblin)
+      case floor if floor < 3  => Distribution.weighted(25 -> Npc.Spider, 25 -> Npc.Bat, 50 -> Npc.Goblin)
+      case floor if floor < 5  => Distribution.weighted(10 -> Npc.Bat, 80 -> Npc.Goblin, 10 -> Npc.Orc)
+      case floor if floor < 7  => Distribution.weighted(70 -> Npc.Goblin, 30 -> Npc.Orc)
+      case floor if floor < 10 => Distribution.weighted(50 -> Npc.Goblin, 40 -> Npc.Orc, 10 -> Npc.Troll)
+      case floor if floor < 12 =>
+        Distribution.weighted(20 -> Npc.Goblin, 40 -> Npc.Orc, 20 -> Npc.Troll, 14 -> Npc.Centaur, 1 -> Npc.Minartaur)
+      case _ => Distribution.weighted(10 -> Npc.Orc, 40 -> Npc.Troll, 45 -> Npc.Centaur, 5 -> Npc.Minartaur)
     },
     maxItems = {
       case floor if floor < 4 => 1
       case _                  => 2
     },
     itemDistribution = {
-      case floor if floor < 2 => Distribution.weighted(35 -> Item.HealingPotion)
+      case floor if floor < 2 =>
+        Distribution.weighted(
+          100 -> Item.SmallHealingPotion
+        )
       case floor if floor < 4 =>
         Distribution.weighted(
-          35 -> Item.HealingPotion,
+          65 -> Item.SmallHealingPotion,
+          5  -> Item.LargeHealingPotion,
           10 -> Item.ConfusionScroll,
-          5  -> Equipment.Dagger,
-          5  -> Equipment.LeatherArmor
+          5  -> Item.LightningScroll,
+          15 -> Equipment.Club
         )
       case floor if floor < 6 =>
         Distribution.weighted(
-          35 -> Item.HealingPotion,
+          40 -> Item.SmallHealingPotion,
+          10 -> Item.LargeHealingPotion,
           10 -> Item.ConfusionScroll,
-          25 -> Item.LightningScroll,
-          5  -> Equipment.Sword,
+          10 -> Item.LightningScroll,
+          10 -> Equipment.Club,
+          5  -> Equipment.Dagger,
           5  -> Equipment.LeatherArmor
+        )
+      case floor if floor < 10 =>
+        Distribution.weighted(
+          20 -> Item.SmallHealingPotion,
+          20 -> Item.LargeHealingPotion,
+          15 -> Item.ConfusionScroll,
+          15 -> Item.LightningScroll,
+          5  -> Item.FireballScroll,
+          10 -> Equipment.Dagger,
+          5  -> Equipment.Sword,
+          10 -> Equipment.LeatherArmor,
+          5  -> Equipment.ChainMail
         )
       case _ =>
         Distribution.weighted(
-          35 -> Item.HealingPotion,
-          10 -> Item.ConfusionScroll,
-          25 -> Item.LightningScroll,
-          25 -> Item.FireballScroll,
-          25 -> Item.LightningScroll,
-          15 -> Equipment.Sword,
-          15 -> Equipment.ChainMail
+          30 -> Item.LargeHealingPotion,
+          9  -> Item.ConfusionScroll,
+          1  -> Item.ParalysisTome,
+          14 -> Item.LightningScroll,
+          1  -> Item.LightningTome,
+          14 -> Item.FireballScroll,
+          1  -> Item.FireballTome,
+          5  -> Equipment.Dagger,
+          10 -> Equipment.Sword,
+          10 -> Equipment.ChainMail,
+          5  -> Equipment.PlateArmor
         )
     }
   )

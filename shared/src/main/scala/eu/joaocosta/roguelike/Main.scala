@@ -3,6 +3,7 @@ package eu.joaocosta.roguelike
 import eu.joaocosta.minart.backend.defaults._
 import eu.joaocosta.minart.graphics._
 import eu.joaocosta.minart.graphics.pure._
+import eu.joaocosta.minart.input.KeyboardInput
 import eu.joaocosta.minart.runtime._
 import eu.joaocosta.minart.runtime.pure._
 import eu.joaocosta.roguelike.AppState._
@@ -16,12 +17,16 @@ object Main extends MinartApp {
     width = constants.screenWidth * constants.spriteWidth,
     height = constants.screenHeight * constants.spriteHeight,
     scale = 2,
-    clearColor = constants.Pallete.black
+    clearColor = constants.Pallete.black,
+    title = constants.title
   )
   val canvasManager = CanvasManager()
   val initialState  = (AppState.initialState, Input())
   val frameRate     = LoopFrequency.hz60
   val terminateWhen = (state: State) => state._1 == Leaving
+
+  val toggleFullscreen =
+    CanvasIO.getSettings.flatMap(settings => CanvasIO.changeSettings(settings.copy(fullScreen = !settings.fullScreen)))
 
   val renderFrame = { case (appState, input) =>
     for {
@@ -32,6 +37,7 @@ object Main extends MinartApp {
       _        <- AppStateRenderer.render(appState, Resources.richFont, pointer)
       actions   = Action.getActions(appState, input.keyPresses)
       nextState = (appState.applyActions(actions), newInput)
+      _ <- CanvasIO.when(input.keyPresses.contains(KeyboardInput.Key.F))(toggleFullscreen)
     } yield nextState
   }
 }
