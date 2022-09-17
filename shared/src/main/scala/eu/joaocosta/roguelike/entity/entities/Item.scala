@@ -13,10 +13,16 @@ sealed trait Item extends Entity with Consumable.Component {
 }
 
 object Item {
-  val HealingPotion = HealingItem.Builder(
-    name = "Healing potion",
+  val SmallHealingPotion = HealingItem.Builder(
+    name = "Small healing potion",
+    sprite = Window.Sprite(':', Pallete.lightBlue),
+    heal = 2
+  )
+
+  val LargeHealingPotion = HealingItem.Builder(
+    name = "Large healing potion",
     sprite = Window.Sprite('!', Pallete.lightBlue),
-    heal = 4
+    heal = 6
   )
 
   val ConfusionScroll = ConfusionSpell.Builder(
