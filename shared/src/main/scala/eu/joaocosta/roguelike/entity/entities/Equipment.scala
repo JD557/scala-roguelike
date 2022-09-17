@@ -36,13 +36,13 @@ object Equipment {
   val Sword = Weapon.Builder(
     name = "Sword",
     sprite = Window.Sprite('\\', Pallete.orange),
-    attackBonus = 4,
+    attackBonus = 5,
     attackVerb = "sliced"
   )
 
   val LeatherArmor = Armor.Builder(
     name = "Leather Armor",
-    sprite = Window.Sprite(']', Pallete.orange),
+    sprite = Window.Sprite(']', Pallete.yellow),
     defenseBonus = 1
   )
 

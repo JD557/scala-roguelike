@@ -16,7 +16,7 @@ object Item {
   val SmallHealingPotion = HealingItem.Builder(
     name = "Small healing potion",
     sprite = Window.Sprite(':', Pallete.lightBlue),
-    heal = 2
+    heal = 3
   )
 
   val LargeHealingPotion = HealingItem.Builder(

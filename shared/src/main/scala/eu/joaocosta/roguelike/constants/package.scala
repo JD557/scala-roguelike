@@ -27,11 +27,14 @@ package object constants {
       case _                  => 5
     },
     monsterDistribution = {
-      case floor if floor < 2 => Distribution.weighted(40 -> Npc.Spider, 40 -> Npc.Bat, 20 -> Npc.Goblin)
-      case floor if floor < 3 => Distribution.weighted(25 -> Npc.Spider, 25 -> Npc.Bat, 50 -> Npc.Goblin)
-      case floor if floor < 5 => Distribution.weighted(10 -> Npc.Bat, 80 -> Npc.Goblin, 10 -> Npc.Orc)
-      case floor if floor < 7 => Distribution.weighted(70 -> Npc.Goblin, 30 -> Npc.Orc)
-      case _                  => Distribution.weighted(50 -> Npc.Goblin, 40 -> Npc.Orc, 10 -> Npc.Troll)
+      case floor if floor < 2  => Distribution.weighted(40 -> Npc.Spider, 40 -> Npc.Bat, 20 -> Npc.Goblin)
+      case floor if floor < 3  => Distribution.weighted(25 -> Npc.Spider, 25 -> Npc.Bat, 50 -> Npc.Goblin)
+      case floor if floor < 5  => Distribution.weighted(10 -> Npc.Bat, 80 -> Npc.Goblin, 10 -> Npc.Orc)
+      case floor if floor < 7  => Distribution.weighted(70 -> Npc.Goblin, 30 -> Npc.Orc)
+      case floor if floor < 10 => Distribution.weighted(50 -> Npc.Goblin, 40 -> Npc.Orc, 10 -> Npc.Troll)
+      case floor if floor < 12 =>
+        Distribution.weighted(20 -> Npc.Goblin, 40 -> Npc.Orc, 20 -> Npc.Troll, 14 -> Npc.Centaur, 1 -> Npc.Minartaur)
+      case _ => Distribution.weighted(10 -> Npc.Orc, 40 -> Npc.Troll, 45 -> Npc.Centaur, 5 -> Npc.Minartaur)
     },
     maxItems = {
       case floor if floor < 4 => 1
@@ -46,9 +49,9 @@ package object constants {
         Distribution.weighted(
           65 -> Item.SmallHealingPotion,
           5  -> Item.LargeHealingPotion,
-          15 -> Item.ConfusionScroll,
+          10 -> Item.ConfusionScroll,
           5  -> Item.LightningScroll,
-          10 -> Equipment.Club
+          15 -> Equipment.Club
         )
       case floor if floor < 6 =>
         Distribution.weighted(

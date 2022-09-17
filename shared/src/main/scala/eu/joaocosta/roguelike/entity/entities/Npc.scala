@@ -38,14 +38,14 @@ object Npc {
   val Goblin = Npc.Builder(
     name = "Goblin",
     sprite = Window.Sprite('g', Pallete.lightGreen),
-    fighter = Fighter(10, 10, 3, 0, 35, Map(Slot.Weapon -> Equipment.Dagger(0, 0))),
+    fighter = Fighter(10, 10, 3, 1, 35, Map(Slot.Weapon -> Equipment.Dagger(0, 0))),
     ai = Behavior.Hostile(constants.playerVision)
   )
 
   val Orc = Npc.Builder(
     name = "Orc",
     sprite = Window.Sprite('O', Pallete.lightGreen),
-    fighter = Fighter(16, 16, 7, 1, 50),
+    fighter = Fighter(16, 16, 7, 2, 50),
     ai = Behavior.Hostile(constants.playerVision)
   )
 
@@ -53,6 +53,20 @@ object Npc {
     name = "Troll",
     sprite = Window.Sprite('T', Pallete.darkGreen),
     fighter = Fighter(20, 20, 10, 3, 100, Map(Slot.Weapon -> Equipment.Club(0, 0))),
+    ai = Behavior.Hostile(constants.playerVision)
+  )
+
+  val Centaur = Npc.Builder(
+    name = "Centaur",
+    sprite = Window.Sprite('w', Pallete.brown),
+    fighter = Fighter(40, 40, 15, 5, 250, Map(Slot.Weapon -> Equipment.Sword(0, 0))),
+    ai = Behavior.Hostile(constants.playerVision)
+  )
+
+  val Minartaur = Npc.Builder(
+    name = "Minartaur",
+    sprite = Window.Sprite('W', Pallete.red),
+    fighter = Fighter(50, 50, 25, 10, 1000, Map(Slot.Weapon -> Equipment.Sword(0, 0))),
     ai = Behavior.Hostile(constants.playerVision)
   )
 
