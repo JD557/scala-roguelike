@@ -25,10 +25,18 @@ object Item {
     heal = 6
   )
 
-  val ConfusionScroll = ConfusionSpell.Builder(
+  val ConfusionScroll = StatusSpell.Builder(
     name = "Confusion scroll",
     sprite = Window.Sprite('~', Pallete.green),
+    behavior = Behavior.Confused,
     turns = 10
+  )
+
+  val ParalysisTome = StatusSpell.Builder(
+    name = "Paralysis tome",
+    sprite = Window.Sprite('=', Pallete.green),
+    behavior = Behavior.DoNothing,
+    turns = 5
   )
 
   val LightningScroll = LightningSpell.Builder(
@@ -38,11 +46,25 @@ object Item {
     maxRange = 8
   )
 
+  val LightningTome = LightningSpell.Builder(
+    name = "Thunderstorm tome",
+    sprite = Window.Sprite('=', Pallete.yellow),
+    damage = 40,
+    maxRange = 8
+  )
+
   val FireballScroll = FireSpell.Builder(
     name = "Fireball scroll",
     sprite = Window.Sprite('~', Pallete.red),
     damage = 12,
     radius = 2
+  )
+
+  val FireballTome = FireSpell.Builder(
+    name = "Hellfire tome",
+    sprite = Window.Sprite('=', Pallete.red),
+    damage = 20,
+    radius = 4
   )
 
   final case class HealingItem(x: Int, y: Int, name: String, sprite: Window.Sprite, heal: Int) extends Item {
@@ -57,8 +79,10 @@ object Item {
       def apply(x: Int, y: Int): HealingItem = HealingItem(x, y, name, sprite, heal)
     }
   }
-  final case class ConfusionSpell(x: Int, y: Int, name: String, sprite: Window.Sprite, turns: Int) extends Item {
-    def setPosition(x: Int, y: Int): ConfusionSpell =
+
+  final case class StatusSpell(x: Int, y: Int, name: String, sprite: Window.Sprite, behavior: Behavior, turns: Int)
+      extends Item {
+    def setPosition(x: Int, y: Int): StatusSpell =
       copy(x = x, y = y)
     def consumeResult(user: Entity, entities: List[Entity]): Action =
       Action.LookAround { selectedEntities =>
@@ -66,17 +90,19 @@ object Item {
           .collectFirst { case e: BehaviorEntity =>
             Action.ChangeBehavior(
               e,
-              oldBehavior => Behavior.TemporaryBehavior(oldBehavior, Behavior.Confused, turns)
+              oldBehavior => Behavior.TemporaryBehavior(oldBehavior, behavior, turns)
             )
           }
           .getOrElse(Action.NothingHappened)
       }
   }
-  object ConfusionSpell {
-    final case class Builder(name: String, sprite: Window.Sprite, turns: Int) extends Entity.Builder[ConfusionSpell] {
-      def apply(x: Int, y: Int): ConfusionSpell = ConfusionSpell(x, y, name, sprite, turns)
+  object StatusSpell {
+    final case class Builder(name: String, sprite: Window.Sprite, behavior: Behavior, turns: Int)
+        extends Entity.Builder[StatusSpell] {
+      def apply(x: Int, y: Int): StatusSpell = StatusSpell(x, y, name, sprite, behavior, turns)
     }
   }
+
   final case class LightningSpell(x: Int, y: Int, name: String, sprite: Window.Sprite, damage: Int, maxRange: Int)
       extends Item {
     def setPosition(x: Int, y: Int): LightningSpell =
@@ -111,6 +137,7 @@ object Item {
       def apply(x: Int, y: Int): LightningSpell = LightningSpell(x, y, name, sprite, damage, maxRange)
     }
   }
+
   final case class FireSpell(x: Int, y: Int, name: String, sprite: Window.Sprite, damage: Int, radius: Int)
       extends Item {
     def setPosition(x: Int, y: Int): FireSpell =

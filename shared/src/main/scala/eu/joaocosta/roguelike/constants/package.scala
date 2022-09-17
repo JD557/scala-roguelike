@@ -78,13 +78,16 @@ package object constants {
       case _ =>
         Distribution.weighted(
           30 -> Item.LargeHealingPotion,
-          10 -> Item.ConfusionScroll,
-          15 -> Item.LightningScroll,
-          15 -> Item.FireballScroll,
+          9  -> Item.ConfusionScroll,
+          1  -> Item.ParalysisTome,
+          14 -> Item.LightningScroll,
+          1  -> Item.LightningTome,
+          14 -> Item.FireballScroll,
+          1  -> Item.FireballTome,
           5  -> Equipment.Dagger,
           10 -> Equipment.Sword,
-          5  -> Equipment.LeatherArmor,
-          10 -> Equipment.ChainMail
+          10 -> Equipment.ChainMail,
+          5  -> Equipment.PlateArmor
         )
     }
   )
