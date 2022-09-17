@@ -2,7 +2,7 @@
 
 A basic roguelike implementation roughly following ["Yet Another Roguelike Tutorial"](http://rogueliketutorials.com/tutorials/tcod/v2/)
 
-Online Demo: https://joaocosta.eu/Demos/Roguelike/ (Might be outdated)
+Online Version: https://jd557.itch.io/the-minartaurs-lair
 
 Implemented using [Minart](https://github.com/JD557/minart)
 
