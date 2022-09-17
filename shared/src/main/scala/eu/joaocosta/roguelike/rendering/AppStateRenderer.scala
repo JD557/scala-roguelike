@@ -92,7 +92,7 @@ object AppStateRenderer extends ChainingSyntax {
     )(window)
   }
 
-  private def putPlayerStatus(state: GameState)(window: Window): Window = {
+  private def putPlayerStatus(state: GameState, showHelp: Boolean = false)(window: Window): Window = {
     def drawBar(text: String, filled: Int, total: Int, barSize: Int, filledColor: Color, emptyColor: Color): Window = {
       val filledTiles = (barSize * filled) / total
       val freeTiles   = barSize - filledTiles
@@ -159,8 +159,8 @@ object AppStateRenderer extends ChainingSyntax {
       )
       .printLine(
         constants.rightStatusX,
-        constants.statusY + 3,
-        s" H: Show help"
+        constants.statusY + 5,
+        if (showHelp) " H: Show help" else ""
       )
   }
 
@@ -349,7 +349,7 @@ object AppStateRenderer extends ChainingSyntax {
         .pipe(putGameTiles(inGame.gameState))
         .pipe(printSelectedEntities(inGame.gameState, cursorPos))
         .pipe(putGameMessages(inGame.gameState, constants.maxMessages, 0))
-        .pipe(putPlayerStatus(inGame.gameState))
+        .pipe(putPlayerStatus(inGame.gameState, showHelp = true))
     case gameOver: GameOver =>
       val cursorPos = pointerPos.map(pos => (pos.x / constants.spriteWidth, pos.y / constants.spriteHeight, 0))
       Window.empty
