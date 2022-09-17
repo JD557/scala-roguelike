@@ -35,7 +35,7 @@ object Item {
     name = "Lightning scroll",
     sprite = Window.Sprite('~', Pallete.yellow),
     damage = 20,
-    maxRange = 5
+    maxRange = 8
   )
 
   val FireballScroll = FireSpell.Builder(
@@ -89,13 +89,17 @@ object Item {
       }
       val maxDistance = maxRange * maxRange
       entities.iterator
+        .collect { case e: FighterEntity =>
+          (e, distance(e.x, e.y))
+        }
         .foldLeft[Option[(FighterEntity, Int)]](None) {
-          case (closestEntity, e1: FighterEntity) =>
-            val dist1 = distance(e1.x, e1.y)
-            if (dist1 < maxRange) closestEntity.map { case (e2, dist2) =>
-              if (dist1 < dist2) (e1, dist1) else (e2, dist2)
+          case (closestEntity, (e1, dist1)) if dist1 != 0 =>
+            val currentEntity = Some((e1, dist1))
+            closestEntity match {
+              case None if dist1 < maxDistance          => currentEntity
+              case Some((e2, dist2)) if (dist1 < dist2) => currentEntity
+              case _                                    => closestEntity
             }
-            else closestEntity
           case (closestEntity, _) => closestEntity
         }
         .fold(Action.NothingHappened) { case (entity, _) => Action.Damage(List(entity), damage) }
