@@ -9,35 +9,40 @@ import eu.joaocosta.minart.runtime.pure._
 import eu.joaocosta.roguelike.AppState._
 import eu.joaocosta.roguelike.rendering.AppStateRenderer
 
-object Main extends MinartApp {
+object Main extends MinartApp[(AppState, Input), LowLevelCanvas] {
 
-  type State = (AppState, Input)
-  val loopRunner = LoopRunner()
+  val loopRunner      = LoopRunner()
+  val createSubsystem = () => LowLevelCanvas.create()
   val canvasSettings = Canvas.Settings(
     width = constants.screenWidth * constants.spriteWidth,
     height = constants.screenHeight * constants.spriteHeight,
-    scale = 2,
+    scale = Some(2),
     clearColor = constants.Pallete.black,
     title = constants.title
   )
-  val canvasManager = CanvasManager()
-  val initialState  = (AppState.initialState, Input())
-  val frameRate     = LoopFrequency.hz60
-  val terminateWhen = (state: State) => state._1 == Leaving
+  val initialState = (AppState.initialState, Input())
+  val frameRate    = LoopFrequency.hz60
 
   val toggleFullscreen =
-    CanvasIO.getSettings.flatMap(settings => CanvasIO.changeSettings(settings.copy(fullScreen = !settings.fullScreen)))
+    CanvasIO.canvasSettings.flatMap(settings =>
+      CanvasIO.changeSettings(settings.copy(fullScreen = !settings.fullScreen))
+    )
 
-  val renderFrame = { case (appState, input) =>
-    for {
-      _        <- CanvasIO.redraw
-      newInput <- CanvasIO.getKeyboardInput.map(input.update)
-      pointer  <- CanvasIO.getPointerInput
-      _        <- CanvasIO.clear()
-      _        <- AppStateRenderer.render(appState, Resources.richFont, pointer)
-      actions   = Action.getActions(appState, input.keyPresses)
-      nextState = (appState.applyActions(actions), newInput)
-      _ <- CanvasIO.when(input.keyPresses.contains(KeyboardInput.Key.F))(toggleFullscreen)
-    } yield nextState
-  }
+  val appLoop = AppLoop
+    .statefulRenderLoop[(AppState, Input)](
+      { case (appState: AppState, input: Input) =>
+        for {
+          _        <- CanvasIO.redraw
+          newInput <- CanvasIO.getKeyboardInput.map(input.update)
+          pointer  <- CanvasIO.getPointerInput
+          _        <- CanvasIO.clear()
+          _        <- AppStateRenderer.render(appState, Resources.richFont, pointer)
+          actions   = Action.getActions(appState, input.keyPresses)
+          nextState = (appState.applyActions(actions), newInput)
+          _ <- CanvasIO.when(input.keyPresses.contains(KeyboardInput.Key.F))(toggleFullscreen)
+        } yield nextState
+      },
+      _._1 == AppState.Leaving
+    )
+    .configure(canvasSettings, frameRate, initialState)
 }
